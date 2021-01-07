@@ -10,22 +10,23 @@ The goal of this library is to TBD.
 .. _website2: https://pressio.github.io/pressio4py/html/index.html
 
 
-Install
--------
+..
+   Install
+   -------
 
-You can try to use `pip` directly:
+   You can try to use `pip` directly:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-  pip install pressio-hyperreduction
+     pip install pressio-hyperreduction
 
 
-You can double check that everything worked fine by doing:
+   You can double check that everything worked fine by doing:
 
-.. code-block:: python
+   .. code-block:: python
 
-  import pressio-hyperreduction as phr
-  print(phr.__version__)
+     import pressio-hyperreduction as phr
+     print(phr.__version__)
 
 
 
