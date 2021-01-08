@@ -1,5 +1,5 @@
-pressio-tools: Auxiliary tools for pressio
-=====================================================================
+pressio-tools
+=============
 
 This Python library provides tools 
 to be used for pressio (website_) or pressio4py (website2_).
