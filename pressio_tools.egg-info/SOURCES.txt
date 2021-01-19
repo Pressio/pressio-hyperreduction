@@ -1,8 +1,0 @@
-README.md
-setup.py
-pressio_tools.egg-info/PKG-INFO
-pressio_tools.egg-info/SOURCES.txt
-pressio_tools.egg-info/dependency_links.txt
-pressio_tools.egg-info/not-zip-safe
-pressio_tools.egg-info/requires.txt
-pressio_tools.egg-info/top_level.txt
