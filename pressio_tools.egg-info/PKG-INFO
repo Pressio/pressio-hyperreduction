@@ -1,0 +1,33 @@
+Metadata-Version: 1.2
+Name: pressio-tools
+Version: 0.6.1rc1
+Summary: pressio-tools
+Home-page: UNKNOWN
+Author: TBD
+Author-email: TBD
+License: UNKNOWN
+Project-URL: Source, https://github.com/Pressio/pressio-tools
+Description: pressio-tools
+        =============
+        
+        This Python library provides tools 
+        to be used for pressio (website_) or pressio4py (website2_).
+        The goal of this library is to TBD.
+        
+        .. _website: https://pressio.github.io/pressio/html/index.html
+        
+        .. _website2: https://pressio.github.io/pressio4py/html/index.html
+        
+Keywords: model reduction,scientific computing,dense linear algebra,HPC
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: Unix
+Classifier: Environment :: MacOS X
+Classifier: Programming Language :: C++
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Classifier: Topic :: Scientific/Engineering :: Physics
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Development Status :: 4 - Beta
+Requires-Python: >=3

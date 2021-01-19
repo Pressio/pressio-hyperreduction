@@ -1,0 +1,8 @@
+
+option(PRESSIO_TOOLS_ENABLE_TPL_LAPACK "Enable Lapack TPL" OFF)
+if(PRESSIO_TOOLS_ENABLE_TPL_LAPACK)
+
+find_package(LAPACK REQUIRED)
+link_libraries(${LAPACK_LIBRARIES})
+
+endif()
