@@ -3,7 +3,7 @@
 
 This repository provides capabilities for:
 
-- TSQR-based SVD of a distributed matrix
+- computing the SVD of a distributed matrix
 
 - computing sample mesh indices for hyperreduction via
 
