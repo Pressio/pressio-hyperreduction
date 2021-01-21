@@ -52,7 +52,9 @@ class CMakeBuild(build_ext):
     # TRILINOS
     #-------------------------------------------------------------------
     # check if TRILINOS_ROOT is present, if not attemp build
-    if "TRILINOS_ROOT" not in os.environ:
+    trilroot = os.environ.get("TRILINOS_ROOT")
+    print(trilroot)
+    if "TRILINOS_ROOT" not in os.environ or trilroot == "":
       msg = "TRILINOS_ROOT not found, attempting to build"
 
       trilTarName = "trilinos-release-13-0-1.tar.gz"
@@ -83,7 +85,6 @@ class CMakeBuild(build_ext):
       print("trilBuildDir = ", trilBuildDir)
       trilInstallDir = trilinosSubDir+"/install"
       print("trilInstall = ", trilInstallDir)
-      if not os.path.exists(trilBuildDir): os.makedirs(trilBuildDir)
 
       cmake_args = [
         "-DCMAKE_BUILD_TYPE={}".format("Release"),
@@ -94,10 +95,15 @@ class CMakeBuild(build_ext):
         "-DTrilinos_ENABLE_Tpetra={}".format("ON"),
         "-DTrilinos_ENABLE_TpetraTSQR={}".format("ON"),
         "-DTrilinos_ENABLE_Epetra={}".format("ON"),
+        "-DTrilinos_ENABLE_Ifpack={}".format("ON"),
+        "-DTrilinos_ENABLE_Ifpack2={}".format("ON"),
+        "-DTrilinos_ENABLE_Triutils={}".format("ON"),
         "-DCMAKE_INSTALL_PREFIX={}".format(trilInstallDir),
       ]
 
       if not os.path.exists(trilBuildDir):
+        os.makedirs(trilBuildDir)
+
         subprocess.check_call(
           ["cmake", trilSrcDir] + cmake_args, cwd=trilBuildDir
         )
@@ -117,8 +123,10 @@ class CMakeBuild(build_ext):
     #-------------------------------------------------------------------
     # build/install pressio-tools
     #-------------------------------------------------------------------
+    cc = os.environ.get("MPI_BASE_DIR")+"/bin/mpicc"
     cxx = os.environ.get("MPI_BASE_DIR")+"/bin/mpicxx"
     cmake_args = [
+      "-DCMAKE_C_COMPILER={}".format(cc),
       "-DCMAKE_CXX_COMPILER={}".format(cxx),
       "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
       "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),

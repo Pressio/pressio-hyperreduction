@@ -33,16 +33,13 @@ set(TRILINOS_LIB_NAMES
   teuchosparser
   teuchoscore
   epetra
-  #epetraext
-  #ifpack
-  #aztecoo
-  #ifpack2
-  #triutils
+  ifpack
+  ifpack2
+  triutils
   # repeat to solve issue we have on linux
   teuchosparameterlist)
 
 #include_directories(${TRILINOS_ROOT}/include)
 #link_directories(${TRILINOS_ROOT}/lib ${TRILINOS_ROOT}/lib64)
 #link_libraries(${TRILINOS_LIB_NAMES})
-
 #endif()
