@@ -29,7 +29,7 @@ See [this wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-
 
 We belive that that best way to explain how to use `pressio-tools` is via concrete demos.
 
-- Interested in the QR factorizaton? Look at the [demo]().
+- Interested in the QR factorizaton? Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/qr.py).
 - Interested in the SVD functionality? Look at TBD.
 
 # Questions?
