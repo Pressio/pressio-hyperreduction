@@ -16,15 +16,15 @@ def run():
 
   For example, suppose have 4 ranks:
 
-     0     j        4
+       0     j        4
   i=0  ----------------
-        rank=0
+          rank=0
   24   ----------------
-        rank=1
+          rank=1
   49   ----------------
-        rank=2
+          rank=2
   74   ----------------
-        rank=3
+          rank=3
   i=99 ----------------
 
   Each rank owns 25 rows and all columns of A.
