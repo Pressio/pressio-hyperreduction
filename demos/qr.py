@@ -56,19 +56,21 @@ def run():
   A = pressiotools.MultiVector(myLocalRandPiece)
 
   # construct a Tsqr object
-  qrO = pt.Tsqr()
+  qrO = pressiotools.Tsqr()
   # comptue the QR factorization of A
   qrO.computeThinOutOfPlace(A)
 
-  # the R factor (small and upper tridiagonal)
-  # is replicated on all ranks
-  # R is here a numpy array that you can use as you want
+  # the R factor (5x5 upper tridiagonal matrix) is replicated on all ranks
+  # R is a numpy array that you can use as you want
   R = qrO.viewR()
+  print("Rank = {}, R.shape = {}".format(rank, R.shape))
 
   # the Q matrix is block-row distributed in the same way A is
   # so viewing the LocalQ here means that you only access
   # the rows of Q that belong to this rank
+  # Q is a numpy array that you can use as needed
   Q = qrO.viewLocalQ()
+  print("Rank = {}, Q.shape = {}".format(rank, Q.shape))
 
   # note: the above methods are called "view" because NO copy is made
 
