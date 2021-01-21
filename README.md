@@ -1,7 +1,7 @@
 
 # Overview
 
-`pressio-tools` is a *self-contained* collection of functionalities accessible from Python currently supporting:
+`pressio-tools` includes functionalities accessible from Python currently supporting:
 
 - QR factorization of a distributed (tall-skinny) matrix
 
@@ -18,11 +18,19 @@
 # When to use pressio-tools?
 
 *`pressio-tools` is mainly intended to operate on large data distributed on large-scale machines.*
+
 For example, suppose you want to use the SVD functionality. If you have a "small" matrix that fits on a single node, using pressio-tools to compute its SVD is excessive, and you (likely) can as easily use scipy.svd or other libraries for shared-memory computing like Eigen.
 However, if you have a large tall-skinny matrix distributed over a large machine and need to compute its SVD, then `pressio-tools` is right for you.
 
 # Installing
 See [this wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-and-installation).
+
+# Usage
+
+We belive that that best way to explain how to use `pressio-tools` is via concrete demos.
+
+- Interested in the QR factorizaton? Look at the [demo]().
+- Interested in the SVD functionality? Look at TBD.
 
 # Questions?
 Find us on Slack: https://pressioteam.slack.com or open an issue on [github](https://github.com/Pressio/pressio-tools).
