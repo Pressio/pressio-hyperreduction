@@ -1,4 +1,5 @@
 
+import sys
 import numpy as np
 from mpi4py import MPI
 import pressiotools
@@ -15,23 +16,25 @@ def run():
 
   For example, suppose have 4 ranks:
 
-     0              4
-  0  ----------------
-       rank=0
-  24 ----------------
-       rank=1
-  49 ----------------
-       rank=2
-  74 ----------------
-       rank=3
-  99 ----------------
+     0     j        4
+  i=0  ----------------
+        rank=0
+  24   ----------------
+        rank=1
+  49   ----------------
+        rank=2
+  74   ----------------
+        rank=3
+  i=99 ----------------
 
-  Each rank owns 25 rows and all columns.
+  Each rank owns 25 rows and all columns of A.
   '''
 
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 4)
+  if (comm.Get_size() != 4):
+    print("Rerun with 4 ranks")
+    sys.exit()
 
   # fix seed for reproducibility
   np.random.seed(312367)
@@ -67,8 +70,7 @@ def run():
   # the rows of Q that belong to this rank
   Q = qrO.viewLocalQ()
 
-  # note that the above methods are called "view"
-  # because NO copy is made
+  # note: the above methods are called "view" because NO copy is made
 
 if __name__ == '__main__':
   run()
