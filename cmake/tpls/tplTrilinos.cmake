@@ -33,11 +33,11 @@ set(TRILINOS_LIB_NAMES
   teuchosparser
   teuchoscore
   epetra
-  epetraext
-  ifpack
-  aztecoo
-  ifpack2
-  triutils
+  #epetraext
+  #ifpack
+  #aztecoo
+  #ifpack2
+  #triutils
   # repeat to solve issue we have on linux
   teuchosparameterlist)
 

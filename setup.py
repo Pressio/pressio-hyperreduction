@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Authors:
-# Francesco Rizzi (fnrizzi@sandia.gov, francesco.rizzi@ng-analytics.com)
+# Francesco Rizzi (francesco.rizzi@ng-analytics.com)
 # Patrick Blonigan (pblonig@sandia.gov)
 # Eric Parish (ejparis@sandia.gov)
 # John Tencer (jtencer@sandia.gov)
@@ -37,19 +37,89 @@ class CMakeBuild(build_ext):
     # Can be set with Conda-Build, for example.
     cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
-    #------------------------
     cfg = "Debug" if self.debug else "Release"
 
-    if "CXX" not in os.environ:
-      msg = "CXX env var missing, needs to point to your mpic++ compiler"
+    if not os.path.exists(self.build_temp):
+      os.makedirs(self.build_temp)
+
+    #-------------------------------------------------------------------
+    # check that MPI_BASE_DIR is in the environment
+    if "MPI_BASE_DIR" not in os.environ:
+      msg = "\n **ERROR**: \n MPI_BASE_DIR env var is missing, needs to point to your MPI installation directory "
       raise RuntimeError(msg)
 
+    #-------------------------------------------------------------------
+    # TRILINOS
+    #-------------------------------------------------------------------
+    # check if TRILINOS_ROOT is present, if not attemp build
     if "TRILINOS_ROOT" not in os.environ:
-      msg = "TRILINOS_ROOT env var missing, needs to point to your Trilinos install"
-      raise RuntimeError(msg)
+      msg = "TRILINOS_ROOT not found, attempting to build"
 
-    # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
+      trilTarName = "trilinos-release-13-0-1.tar.gz"
+      trilUnpackedName = "Trilinos-trilinos-release-13-0-1"
+      trilUrl = "https://github.com/trilinos/Trilinos/archive/"+trilTarName
+
+      cwd = os.getcwd()
+
+      # create subdirs for trilinos
+      trilinosSubDir = cwd + "/"+self.build_temp+"/../trilinos"
+      if not os.path.exists(trilinosSubDir): os.makedirs(trilinosSubDir)
+
+      trilTarPath = trilinosSubDir+"/"+trilTarName
+      print("trilTarPath ", trilTarPath)
+      if not os.path.exists(trilTarPath):
+        subprocess.check_call(
+          ["wget", "--no-check-certificate", trilUrl], cwd=trilinosSubDir
+        )
+
+      trilSrcDir = trilinosSubDir+"/"+trilUnpackedName
+      print("trilSrcPath ", trilSrcDir)
+      if not os.path.exists(trilSrcDir):
+        subprocess.check_call(
+          ["tar", "zxf", trilTarName], cwd=trilinosSubDir
+        )
+
+      trilBuildDir = trilinosSubDir+"/build"
+      print("trilBuildDir = ", trilBuildDir)
+      trilInstallDir = trilinosSubDir+"/install"
+      print("trilInstall = ", trilInstallDir)
+      if not os.path.exists(trilBuildDir): os.makedirs(trilBuildDir)
+
+      cmake_args = [
+        "-DCMAKE_BUILD_TYPE={}".format("Release"),
+        "-DBUILD_SHARED_LIBS={}".format("ON"),
+        "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
+        "-DTPL_ENABLE_MPI={}".format("ON"),
+        "-DMPI_BASE_DIR={}".format(os.environ.get("MPI_BASE_DIR")),
+        "-DTrilinos_ENABLE_Tpetra={}".format("ON"),
+        "-DTrilinos_ENABLE_TpetraTSQR={}".format("ON"),
+        "-DTrilinos_ENABLE_Epetra={}".format("ON"),
+        "-DCMAKE_INSTALL_PREFIX={}".format(trilInstallDir),
+      ]
+
+      if not os.path.exists(trilBuildDir):
+        subprocess.check_call(
+          ["cmake", trilSrcDir] + cmake_args, cwd=trilBuildDir
+        )
+        subprocess.check_call(
+          ["cmake", "--build", ".", "-j4"], cwd=trilBuildDir
+        )
+        subprocess.check_call(
+          ["cmake", "--install", "."], cwd=trilBuildDir
+        )
+
+      # set env var
+      os.environ["TRILINOS_ROOT"] = trilInstallDir
+
+    else:
+      msg = "Found env var TRILINOS_ROOT={}".format(os.environ.get("TRILINOS_ROOT"))
+
+    #-------------------------------------------------------------------
+    # build/install pressio-tools
+    #-------------------------------------------------------------------
+    cxx = os.environ.get("MPI_BASE_DIR")+"/bin/mpicxx"
     cmake_args = [
+      "-DCMAKE_CXX_COMPILER={}".format(cxx),
       "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
       "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
       "-DPYTHON_EXECUTABLE={}".format(sys.executable),
@@ -70,9 +140,6 @@ class CMakeBuild(build_ext):
       #   # CMake 3.12+ only.
       #   build_args += ["-j{}".format(self.parallel)]
 
-    if not os.path.exists(self.build_temp):
-      os.makedirs(self.build_temp)
-
     subprocess.check_call(
       ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp
     )
@@ -83,7 +150,7 @@ class CMakeBuild(build_ext):
 setup(
   name="pressio-tools",
   version="0.6.1rc1",
-  author="TBD",
+  author="F.Rizzi,P.Blonigan,E.Parish",
   author_email="TBD",
   description="pressio-tools",
   #
@@ -94,7 +161,7 @@ setup(
   long_description=description(),
   ext_modules=[CMakeExtension("pressio-tools")],
   cmdclass={"build_ext": CMakeBuild},
-  install_requires=["numpy", "scipy", "matplotlib", "mpi4py"],
+  install_requires=["numpy", "scipy", "mpi4py"],
   zip_safe=False,
   #
   python_requires='>=3',
