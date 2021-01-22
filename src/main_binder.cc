@@ -42,7 +42,7 @@ PYBIND11_MODULE(pressiotools, mParent)
   svd.def("computeThin", &svd_t::computeThin);
   svd.def("viewSingValues",
 	  &svd_t::viewS, pybind11::return_value_policy::reference);
-  svd.def("viewLeftSingVectors",
+  svd.def("viewLocalLeftSingVectors",
 	  &svd_t::viewU, pybind11::return_value_policy::reference);
   svd.def("viewRightSingVectorsT",
 	  &svd_t::viewVT, pybind11::return_value_policy::reference);

@@ -29,8 +29,19 @@ See [this wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-
 
 We belive that that best way to explain how to use `pressio-tools` is via concrete demos.
 
-- Interested in the QR factorizaton? Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/qr.py).
-- Interested in the SVD functionality? Look at TBD.
+- Interested in the QR factorizaton?
+  - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/qr.py).
+  - You can run it with:
+  ```bash
+  mpirun -np 4 python3 qr.py
+  ```
+
+- Interested in the SVD functionality?
+  - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/svd.py).
+  - You can run it with:
+  ```bash
+  mpirun -np 4 python3 svd.py
+  ```
 
 # Questions?
 Find us on Slack: https://pressioteam.slack.com or open an issue on [github](https://github.com/Pressio/pressio-tools).

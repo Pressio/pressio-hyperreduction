@@ -28,7 +28,7 @@ def svd_run():
   A1 = pt.MultiVector(A)
   svdO = pt.svd()
   svdO.computeThin(A1)
-  U1 = svdO.viewLeftSingVectors()
+  U1 = svdO.viewLocalLeftSingVectors()
   S1 = svdO.viewSingValues()
   VT1 = svdO.viewRightSingVectorsT()
   print(S1)
