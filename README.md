@@ -23,7 +23,7 @@ For example, suppose you want to use the SVD functionality. If you have a "small
 However, if you have a large tall-skinny matrix distributed over a large machine and need to compute its SVD, then `pressio-tools` is right for you.
 
 # Installing
-See [this wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-and-installation).
+See the [wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-and-installation).
 
 # Usage
 
@@ -31,11 +31,11 @@ We belive that that best way to explain how to use `pressio-tools` is via concre
 
 - Interested in the QR factorizaton?
   - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/qr.py).
-  - Run it with: `mpirun -n 4 python3 qr.py`
+  - To run it: `cd demos; mpirun -n 4 python3 qr.py`
 
 - Interested in the SVD functionality?
   - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/svd.py).
-  - Run it with: `mpirun -n 4 python3 svd.py`
+  - To run it: `cd demos; mpirun -n 4 python3 svd.py`
 
 # Questions?
 Find us on Slack: https://pressioteam.slack.com or open an issue on [github](https://github.com/Pressio/pressio-tools).
