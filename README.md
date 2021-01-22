@@ -27,8 +27,6 @@ See the [wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-a
 
 # Usage
 
-To explain how to use `pressio-tools` we use concrete demos.
-
 - Interested in the QR factorizaton?
   - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/qr.py).
   - To run it: `cd demos; mpirun -n 4 python3 qr.py`
