@@ -29,7 +29,6 @@ def svd_run():
   # create distributed A
   myStartRow = rank*5
   A1 = pt.MultiVector(A[myStartRow:myStartRow+5, :])
-  # A1 = pt.MultiVector(A)
   svdO = pt.svd()
   svdO.computeThin(A1)
   U1 = svdO.viewLocalLeftSingVectors()

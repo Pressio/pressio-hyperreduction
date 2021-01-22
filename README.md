@@ -9,9 +9,7 @@
 
 - computation of sample mesh indices for hyper-reduction via
 
-	- Discrete empirical interpolation method (DEIM)
-
-	- other methods (TBD)
+	- TBD
 
 `pressio-tools` is being developed as an auxiliary library to the [pressio C++ library](https://pressio.github.io/pressio/html/index.html) and its [Python bindings library](https://pressio.github.io/pressio4py/html/index.html).
 

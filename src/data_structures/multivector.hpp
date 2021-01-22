@@ -18,6 +18,11 @@ class MultiVector
 public:
   MultiVector() = delete;
   MultiVector(py_f_arr dataIn) : data_(dataIn){
+    if (dataIn.ndim() != 2 ){
+      throw std::runtime_error
+	("A MultiVector is only constructible from rank-2 array");
+    }
+
     computeGlobalNumRows();
     globalShape_[1] = data_.shape(1);
   }

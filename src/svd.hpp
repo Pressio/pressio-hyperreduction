@@ -78,6 +78,9 @@ struct Svd
     return view;
   }
 
+  const mat_t & viewNativeU(){ return U_; }
+  const mat_t & viewNativeVT(){ return VT_; }
+
 private:
   Tsqr qr_;
   Teuchos::LAPACK<int, pressiotools::scalar_t> lpk_;
