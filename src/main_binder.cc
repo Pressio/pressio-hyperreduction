@@ -30,9 +30,11 @@ PYBIND11_MODULE(pressiotools, mParent)
   pybind11::class_<v_t> vec(mParent, "Vector");
   vec.def(pybind11::init<pressiotools::py_f_arr>());
   vec.def(pybind11::init<pressiotools::py_c_arr>());
+  vec.def(pybind11::init<pybind11::ssize_t>());
   vec.def("data", &v_t::data);
   vec.def("extentLocal", &v_t::extentLocal);
   vec.def("extentGlobal", &v_t::extentGlobal);
+  vec.def("sumGlobal", &v_t::sumGlobal);
 
   // bind tsqr
   using tsqr_t = pressiotools::Tsqr;
@@ -40,7 +42,7 @@ PYBIND11_MODULE(pressiotools, mParent)
   tsqr.def(pybind11::init());
   tsqr.def("computeThinOutOfPlace", &tsqr_t::computeThinOutOfPlace);
   tsqr.def("viewR", &tsqr_t::viewR, pybind11::return_value_policy::reference);
-  tsqr.def("viewLocalQ", &tsqr_t::viewLocalQ, pybind11::return_value_policy::reference);
+  tsqr.def("viewQLocal", &tsqr_t::viewLocalQ, pybind11::return_value_policy::reference);
 
   // bind svd
   using svd_t = pressiotools::Svd;
@@ -49,7 +51,7 @@ PYBIND11_MODULE(pressiotools, mParent)
   svd.def("computeThin", &svd_t::computeThin);
   svd.def("viewSingValues",
 	  &svd_t::viewS, pybind11::return_value_policy::reference);
-  svd.def("viewLocalLeftSingVectors",
+  svd.def("viewLeftSingVectorsLocal",
 	  &svd_t::viewU, pybind11::return_value_policy::reference);
   svd.def("viewRightSingVectorsT",
 	  &svd_t::viewVT, pybind11::return_value_policy::reference);
@@ -59,7 +61,7 @@ PYBIND11_MODULE(pressiotools, mParent)
   pybind11::class_<pinv_t> pinv(mParent, "pinv");
   pinv.def(pybind11::init());
   pinv.def("compute", &pinv_t::compute);
-  pinv.def("viewLocalAstarT",
+  pinv.def("viewTransposeLocal",
 	   &pinv_t::viewLocalAstarT, pybind11::return_value_policy::reference);
   pinv.def("apply",
 	   &pinv_t::apply, pybind11::return_value_policy::reference);

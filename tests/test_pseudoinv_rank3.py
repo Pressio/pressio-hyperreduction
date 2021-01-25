@@ -31,7 +31,7 @@ def pinv_run():
   piO.compute(A1)
   # view the local part of A^*T
   # remember that pressiotools.pinv stores A^*T NOT A^*
-  AstarT = piO.viewLocalAstarT()
+  AstarT = piO.viewTransposeLocal()
   print("rank", rank, AstarT)
 
   myBT = BT[myStartRow:myStartRow+5, :]

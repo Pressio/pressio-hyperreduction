@@ -2,7 +2,7 @@
 #ifndef PRESSIOTOOLS_DS_VEC_HPP_
 #define PRESSIOTOOLS_DS_VEC_HPP_
 
-#include "mpi.h"
+#include <iostream>
 
 namespace pressiotools{
 
@@ -15,6 +15,16 @@ class Vector
 
 public:
   Vector() = delete;
+
+  Vector(pybind11::ssize_t localextent)
+    : data_(localextent)
+  {
+    constexpr auto zero = static_cast<pressiotools::scalar_t>(0);
+    for (pybind11::ssize_t i=0; i<localextent; ++i) data_(i) = zero;
+
+    computeGlobalExtent();
+  }
+
   Vector(py_f_arr dataIn) : data_(dataIn){
     if (dataIn.ndim() != 1 ){
       throw std::runtime_error
@@ -43,16 +53,28 @@ public:
     return comm_;
   }
 
-  std::size_t extentLocal() const{
+  pybind11::ssize_t extentLocal() const{
     return data_.shape(0);
   }
 
-  std::size_t extentGlobal() const{
+  pybind11::ssize_t extentGlobal() const{
     return globalExtent_;
   }
 
   py_f_arr data(){
     return data_;
+  }
+
+  pressiotools::scalar_t sumGlobal() const
+  {
+    constexpr auto zero = static_cast<pressiotools::scalar_t>(0);
+    pressiotools::scalar_t localsum = zero;
+    pressiotools::scalar_t globalsum = zero;
+
+    for (pybind11::ssize_t i=0; i<extentLocal(); ++i) localsum += data_(i);
+
+    MPI_Allreduce(&localsum, &globalsum, 1, MPI_DOUBLE, MPI_SUM, comm_);
+    return globalsum;
   }
 
 private:

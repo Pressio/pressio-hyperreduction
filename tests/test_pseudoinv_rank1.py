@@ -24,7 +24,7 @@ def pinv_run():
   A1 = pt.MultiVector(A)
   piO = pt.pinv()
   piO.compute(A1)
-  AstarT = piO.viewLocalAstarT()
+  AstarT = piO.viewTransposeLocal()
   print(AstarT)
 
   assert(np.allclose(B.T, AstarT, atol=1e-10))

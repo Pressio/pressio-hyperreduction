@@ -16,6 +16,11 @@ struct Svd
     //https://spec.oneapi.com/versions/0.5.0/oneMKL/GUID-9753DBC0-04D2-40EA-B1BD-4C83D1FD8C43.html
     //https://docs.trilinos.org/dev/packages/teuchos/doc/html/classTeuchos_1_1LAPACK.html#a8a8a8168153fc043d900541d745a850d
 
+    if (A.extentLocal(0) < A.extentLocal(1)){
+      throw std::runtime_error
+	("The input matrix must have at least as many rows on each processor as there are columns.");
+    }
+
     // 1. compute A = QR
     qr_.computeThinOutOfPlace(A);
 

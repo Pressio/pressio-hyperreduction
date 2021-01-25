@@ -39,13 +39,12 @@ def run():
   # fix seed for reproducibility
   np.random.seed(312367)
 
-  # create the local piece for each rank
-  # here for simplicity we use random numbers
-  # but one can as well fill each piece by reading a file
-  # or some other way.
+  # create the local piece for each rank:
+  # here for simplicity we use random numbers, but one can
+  # fill each piece by reading a file or some other way.
   # Note: the layout MUST be fortran such that
   # pressiotools can view it without copying data.
-  # This is important to ensure a safe memory footprint
+  # This is important to reduced the memory footprint
   # especially for large matrices.
   myLocalRandPiece = np.asfortranarray(np.random.rand(25,5))
 
@@ -61,7 +60,7 @@ def run():
   svdO.computeThin(A)
 
   # U is a numpy array viewing the local piece
-  U = svdO.viewLocalLeftSingVectors()
+  U = svdO.viewLeftSingVectorsLocal()
 
   # S contains the sing values, replicated on each rank
   S = svdO.viewSingValues()

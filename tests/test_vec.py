@@ -7,6 +7,26 @@ import numpy as np
 from mpi4py import MPI
 import pressiotools as pt
 
+def vec_constr():
+  comm = MPI.COMM_WORLD
+  rank = comm.Get_rank()
+  assert(comm.Get_size() == 4)
+
+  if (rank==0): nrows = 5
+  if (rank==1): nrows = 6
+  if (rank==2): nrows = 4
+  if (rank==3): nrows = 6
+
+  A = pt.Vector(nrows)
+  if (rank==0): assert(A.extentLocal()==5)
+  if (rank==1): assert(A.extentLocal()==6)
+  if (rank==2): assert(A.extentLocal()==4)
+  if (rank==3): assert(A.extentLocal()==6)
+
+  Av = A.data()
+  assert(np.allclose(Av, np.zeros(nrows)))
+
+
 def vec_extent():
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
@@ -82,6 +102,7 @@ def vec_content1():
 
 
 if __name__ == '__main__':
+  vec_constr()
   vec_extent()
   vec_extent_global()
   vec_content()

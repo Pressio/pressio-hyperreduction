@@ -27,7 +27,7 @@ def tsqr_run():
   qrO = pt.Tsqr()
   qrO.computeThinOutOfPlace(A1)
   R = qrO.viewR()
-  Q = qrO.viewLocalQ()
+  Q = qrO.viewQLocal()
 
   # Q is distributed so check correct rows
   myQ = Q1[myStartRow:myStartRow+5, :]

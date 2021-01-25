@@ -20,6 +20,11 @@ struct Tsqr
 
   void computeThinOutOfPlace(MultiVector & A)
   {
+    if (A.extentLocal(0) < A.extentLocal(1)){
+      throw std::runtime_error
+	("The input matrix must have at least as many rows on each processor as there are columns.");
+    }
+
     const long long int nRowGlobal = A.extentGlobal(0);
     const long long int nColGlobal = A.extentGlobal(1);
 

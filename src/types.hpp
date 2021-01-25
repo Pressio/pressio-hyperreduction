@@ -4,6 +4,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include "mpi.h"
 
 namespace pressiotools
 {
@@ -13,5 +14,4 @@ using py_c_arr	= pybind11::array_t<scalar_t, pybind11::array::c_style>;
 using py_f_arr	= pybind11::array_t<scalar_t, pybind11::array::f_style>;
 
 }
-
 #endif
