@@ -53,7 +53,7 @@ def samplePMF(comm,pmf,numSampsGlobal):
   # sample pmf locally
   local_pmf = pmf.data() / myProbMass
   localInds = np.arange(pmf.extentLocal())
-  print("Local PMF on rank {}:".format(rank),local_pmf)
+  #print("Local PMF on rank {}:".format(rank),local_pmf)
 
   return np.random.choice(localInds, myNumSamps, p=local_pmf)
 
@@ -97,12 +97,12 @@ def run():
   # compute PMF from leverage scores on each mesh node
   pmf = computePMF(l_scores,dofsPerMnode)
 
-  print("PMF on rank {}:".format(rank),pmf.data())
+  #print("PMF on rank {}:".format(rank),pmf.data())
 
   # sample PMF
   mySampleMeshNodes = samplePMF(comm, pmf, numGlobalSamps)
 
-  print("Sample mesh node indices on rank {}:".format(rank),mySampleMeshNodes)
+  #print("Sample mesh node indices on rank {}:".format(rank),mySampleMeshNodes)
 
   # write sample mesh nodes to disk
   # TODO file I/O
