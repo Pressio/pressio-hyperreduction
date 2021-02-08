@@ -22,7 +22,9 @@ def computePMF(l_scores, dofsPerMnode, pmf_blend=0.5):
   pmf_meshDofs = pt.Vector(myNumMeshNodes)
   pmf_meshDofs.data()[:] = np.zeros(pmf_meshDofs.extentLocal())
 
-  #TODO sum up probabilities for each mesh DoF! 
+  # sum up probabilities for each mesh DoF
+  # assumes that nodal quantities are fastest index 
+  # e.g. mass, momentum, energy for each node are grouped together in residual vector
   for i in range(dofsPerMnode):
     pmf_meshDofs.data()[:] = pmf_meshDofs.data() + pmf_allDofs[i::dofsPerMnode]
 
@@ -66,6 +68,10 @@ def run():
 
   # read matrix
   # TODO matrix reader
+
+  # TODO mapping from local to global mesh indicies
+  # if none is provided, assume that global indices are: 
+  # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
 
   #######################################################
   # TODO remove this piece once matrix IO is implemented:
