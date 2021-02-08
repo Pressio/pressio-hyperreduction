@@ -7,6 +7,7 @@ import numpy as np
 from mpi4py import MPI
 import pressiotools as pt
 import scipy.linalg as la
+import array_io
 
 np.set_printoptions(linewidth=140)
 
@@ -62,38 +63,30 @@ def samplePMF(comm,pmf,numSampsGlobal):
 def run():
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
+  size = comm.Get_size()
 
   # read user inputs
   # TODO yaml parser
+  numGlobalSamps = 8
+  dofsPerMnode = 1
+  fileName = "matrix.bin"
+  nCols = 4
+  isBinary = True
 
   # read matrix
-  # TODO matrix reader
-
+  psi = array_io.read_array_distributed(fileName,4,isBinary)
+  myNumRows = psi.extentLocal(0)
+  
   # TODO mapping from local to global mesh indicies
   # if none is provided, assume that global indices are: 
   # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
+  senddata = myNumRows*np.ones(size,dtype=np.int)
+  rowsPerRank = np.empty(size,dtype=np.int)
+  comm.Alltoall(senddata,rowsPerRank)
 
-  #######################################################
-  # TODO remove this piece once matrix IO is implemented:
-  assert(comm.Get_size() == 3)
+  globalInds = np.arange(myNumRows) + np.sum(rowsPerRank[:rank]) 
+  print(rank,globalInds)
 
-  #np.random.seed(312367)
-  np.random.seed(22)
-
-  # random distributed psi by selecting
-  # rows of a random matrix
-  myNumRows = 8
-  psi0 = np.asfortranarray(np.random.rand( myNumRows * 3,5))
-  if rank==0:
-    print(psi0)
-    print("---------\n")
-
-  myStartRow = rank*myNumRows
-  psi = pt.MultiVector(psi0[myStartRow:myStartRow+myNumRows, :])
-
-  numGlobalSamps = 8
-  dofsPerMnode = 2
- 
   ########################################################
 
   # compute leverage scores
@@ -108,14 +101,27 @@ def run():
   # sample PMF
   mySampleMeshNodes = samplePMF(comm, pmf, numGlobalSamps)
 
-  #print("Sample mesh node indices on rank {}:".format(rank),mySampleMeshNodes)
+  if len(mySampleMeshNodes)>0:
+    # remove duplicate samples
+    mySampleMeshNodes = np.unique(mySampleMeshNodes)
 
+    # map sample mesh nodes to global indices
+    mySampleMeshNodes = globalInds[mySampleMeshNodes]
+
+  print("Sample mesh node indices on rank {}:".format(rank),mySampleMeshNodes)
+  
   # write sample mesh nodes to disk
-  # TODO file I/O
+  # gather array at rank 0
+  sampleMeshNodes = comm.gather(mySampleMeshNodes, root=0)
+  # write to file with numpy
+  if rank==0:
+    sampleMeshNodes = np.concatenate(sampleMeshNodes)
+    np.savetxt("sampleMeshNodes.txt",sampleMeshNodes,fmt="%d")
 
   # write sampling matrix to disk
   # TODO file I/O
-
+  # gather pmf for each DoF on each sample mesh node
+  # write to file with numpy
 
 if __name__ == '__main__':
   run()
