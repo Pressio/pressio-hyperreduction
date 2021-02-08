@@ -7,7 +7,7 @@ sys.path.append(str(file_path) + "/../driver-scripts")
 import numpy as np
 from mpi4py import MPI
 import pressiotools as pt
-from binary_io import *
+from array_io import *
 import scipy.linalg as la
 
 np.set_printoptions(linewidth=140,precision=14)
@@ -40,17 +40,17 @@ def run():
   # test read
   
   # serial read
-  mat0_gold = read_binary_array("matrix.bin.gold",numCols)
+  mat0_gold = read_array("matrix.bin.gold",numCols)
   assert(np.all(np.abs(mat0_gold - mat0) < tol))
 
-  vec0_gold = read_binary_array("vector.bin.gold",1)
+  vec0_gold = read_array("vector.bin.gold",1)
   assert(np.all(np.abs(vec0_gold - vec0) < tol))
 
   # distributed read
-  mat_gold = read_binary_array_distributed("matrix.bin.gold",numCols)
+  mat_gold = read_array_distributed("matrix.bin.gold",numCols)
   assert(np.all(np.abs(mat_gold.data() - mat.data()) < tol))
 
-  vec_gold = read_binary_array_distributed("vector.bin.gold",1)
+  vec_gold = read_array_distributed("vector.bin.gold",1)
   assert(np.all(np.abs(vec_gold.data() - vec.data()) < tol))
 
 
@@ -58,21 +58,21 @@ def run():
   # test write (+ read)
   
   # serial write
-  write_binary_array(mat0,"matrix.bin")
-  mat0_in = read_binary_array("matrix.bin",numCols)
+  write_array(mat0,"matrix.bin")
+  mat0_in = read_array("matrix.bin",numCols)
   assert(np.all(np.abs(mat0_in - mat0) < tol))
 
-  write_binary_array(vec0,"vector.bin")
-  vec0_in = read_binary_array("vector.bin",1)
+  write_array(vec0,"vector.bin")
+  vec0_in = read_array("vector.bin",1)
   assert(np.all(np.abs(vec0_in - vec0) < tol))
 
   # distributed write
-  write_binary_array_distributed(mat,"matrix.bin")
-  mat_in = read_binary_array_distributed("matrix.bin",numCols)
+  write_array_distributed(mat,"matrix.bin")
+  mat_in = read_array_distributed("matrix.bin",numCols)
   assert(np.all(np.abs(mat_in.data() - mat.data()) < tol))
 
-  write_binary_array_distributed(vec,"vector.bin")
-  vec_in = read_binary_array_distributed("vector.bin",1)
+  write_array_distributed(vec,"vector.bin")
+  vec_in = read_array_distributed("vector.bin",1)
   assert(np.all(np.abs(vec_in.data() - vec.data()) < tol))
 
 
