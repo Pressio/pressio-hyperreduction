@@ -41,17 +41,17 @@ def run():
   
   # serial read
   if rank==0:
-    mat0_gold = read_array("matrix.bin.gold",numCols)
+    mat0_gold = read_array("matrix.txt.gold",numCols,isBinary=False)
     assert(np.all(np.abs(mat0_gold - mat0) < tol))
 
-    vec0_gold = read_array("vector.bin.gold",1)
+    vec0_gold = read_array("vector.txt.gold",1,isBinary=False)
     assert(np.all(np.abs(vec0_gold - vec0) < tol))
 
   # distributed read
-  mat_gold = read_array_distributed("matrix.bin.gold",numCols)
+  mat_gold = read_array_distributed("matrix.txt.gold",numCols,isBinary=False)
   assert(np.all(np.abs(mat_gold.data() - mat.data()) < tol))
 
-  vec_gold = read_array_distributed("vector.bin.gold",1)
+  vec_gold = read_array_distributed("vector.txt.gold",1,isBinary=False)
   assert(np.all(np.abs(vec_gold.data() - vec.data()) < tol))
 
 
@@ -60,21 +60,21 @@ def run():
   
   # serial write
   if rank==0:
-    write_array(mat0,"matrix.bin")
-    mat0_in = read_array("matrix.bin",numCols)
+    write_array(mat0,"matrix.txt",isBinary=False)
+    mat0_in = read_array("matrix.txt",numCols,isBinary=False)
     assert(np.all(np.abs(mat0_in - mat0) < tol))
 
-    write_array(vec0,"vector.bin")
-    vec0_in = read_array("vector.bin",1)
+    write_array(vec0,"vector.txt",isBinary=False)
+    vec0_in = read_array("vector.txt",1,isBinary=False)
     assert(np.all(np.abs(vec0_in - vec0) < tol))
 
   # distributed write
-  write_array_distributed(mat,"matrix.bin")
-  mat_in = read_array_distributed("matrix.bin",numCols)
+  write_array_distributed(mat,"matrix.txt",isBinary=False)
+  mat_in = read_array_distributed("matrix.txt",numCols,isBinary=False)
   assert(np.all(np.abs(mat_in.data() - mat.data()) < tol))
 
-  write_array_distributed(vec,"vector.bin")
-  vec_in = read_array_distributed("vector.bin",1)
+  write_array_distributed(vec,"vector.txt",isBinary=False)
+  vec_in = read_array_distributed("vector.txt",1,isBinary=False)
   assert(np.all(np.abs(vec_in.data() - vec.data()) < tol))
 
 

@@ -26,7 +26,7 @@ def write_binary_array(arr,fileName):
 # Ascii IO
 def read_ascii_array(fileName,nCols):
   # read a numpy array from an ascii file "fileName"
-  return np.loadtxt(fileName)
+  return np.asfortranarray(np.loadtxt(fileName))
 
 def write_ascii_array(arr,fileName):
   # write numpy array arr to an ascii file "fileName"
@@ -76,6 +76,6 @@ def write_array_distributed(arr,fileName,isBinary=True):
   nDigit = int(math.log10(size)) + 1
 
   # write BaseVector portion on each processor
-  myfileName = "{}.{}.{:0{width}d}".format(fileName,size,rank,width=nDigit)
+  myFileName = "{}.{}.{:0{width}d}".format(fileName,size,rank,width=nDigit)
   myArr = arr.data()
-  write_array(myArr,fileName,isBinary)
+  write_array(myArr,myFileName,isBinary)
