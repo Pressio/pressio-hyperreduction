@@ -14,5 +14,5 @@ def yaml_read(file_path):
 
 def yaml_write(yaml_obj,file_path):
     with open(file_path,'w') as f:
-        yaml.dump(yaml_obj,f, Dumper=Dumper, default_flow_style=True)
+        yaml.dump(yaml_obj,f)
 
