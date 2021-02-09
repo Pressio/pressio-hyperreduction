@@ -1,0 +1,17 @@
+{
+  ResidualBasis:
+  {
+    residual-basis-root-name: "matrix.bin",
+    residual-basis-format: "binary",
+    num-residual-basis-columns: 4,
+    num-mesh-nodes: 15, 
+    dofs-per-mesh-node: 1,
+
+  },
+  SampleMesh:
+  {
+    num-sample-mesh-nodes: 8,
+    leverage-score-beta: 0.5,
+    #sample-mesh-seed-nodes: "seed.txt" # Optional 
+  },
+}
