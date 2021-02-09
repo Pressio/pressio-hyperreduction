@@ -52,7 +52,7 @@ def run():
   print(r)
   assert( r - 17.076572320951822 < 1e-12)
 
-  l_scores_pmf = computePMF(l_scores,1)
+  l_scores_pmf,_ = computeBlockPMF(l_scores,1)
   print(rank,l_scores_pmf.data())
 
   # check PMF against truth values
