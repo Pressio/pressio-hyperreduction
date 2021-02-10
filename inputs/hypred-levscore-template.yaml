@@ -1,7 +1,8 @@
 ResidualBasis: 
-  residual-basis-root-name: "matrix.bin" # [string] file name root for the residual basis. Assumes decomposed files with the names <residual-basis-root-name>.XX.YY, where XX is the total number of ranks and YY is the rank number for a given file. 
-  residual-basis-format: "binary" # [string] binary or ascii: format of the residual basis file(s)
-  num-residual-basis-columns: 4 # [int] number of columns in the residual basis
+  file-dir: "." # [string], optional: full path to where residual basis file is. Default: working directory
+  file-root-name: "matrix.bin" # [string] file name root for the residual basis. Assumes decomposed files with the names <residual-basis-root-name>.XX.YY, where XX is the total number of ranks and YY is the rank number for a given file. 
+  format: "binary" # [string] binary or ascii: format of the residual basis file(s)
+  num-columns: 4 # [int] number of columns in the residual basis
   num-mesh-nodes: 9 # [int] number of nodes in the mesh
   dofs-per-mesh-node: 2 # [int] number of degrees of freedom at each mesh node 
 SampleMesh: 

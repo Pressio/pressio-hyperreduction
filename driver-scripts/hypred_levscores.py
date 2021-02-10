@@ -85,9 +85,8 @@ indices using random sampling from a probability mass function based on leverage
   yaml_in = yaml_read(args.input)
 
   # read user inputs
-  # TODO yaml parser
-  fileName = yaml_in["ResidualBasis"]["residual-basis-root-name"]
-  fileFmt = yaml_in["ResidualBasis"]["residual-basis-format"]
+  fileName = yaml_in["ResidualBasis"]["file-root-name"]
+  fileFmt = yaml_in["ResidualBasis"]["format"]
 
   isBinary=False
   if fileFmt=="binary":
@@ -101,7 +100,7 @@ indices using random sampling from a probability mass function based on leverage
     sys.exit("Unsupported file format: residual-basis-format must be 'binary' or 'ascii'.")
 
 
-  nCols = yaml_in["ResidualBasis"]["num-residual-basis-columns"]
+  nCols = yaml_in["ResidualBasis"]["num-columns"]
   dofsPerMnode = yaml_in["ResidualBasis"]["dofs-per-mesh-node"]
 
   numGlobalSamps = yaml_in["SampleMesh"]["num-sample-mesh-nodes"]
@@ -111,7 +110,7 @@ indices using random sampling from a probability mass function based on leverage
   psi = array_io.read_array_distributed(comm, fileName, nCols, isBinary)
   myNumRows = psi.extentLocal(0)
 
-  # TODO mapping from local to global mesh indicies
+  # mapping from local to global mesh indicies
   # if none is provided, assume that global indices are:
   # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
   myNumMeshNodes = int(myNumRows/dofsPerMnode)
