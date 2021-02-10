@@ -85,6 +85,9 @@ indices using random sampling from a probability mass function based on leverage
   yaml_in = yaml_read(args.input)
 
   # read user inputs
+  filePath = "."
+  if "files-dir" in yaml_in["ResidualBasis"]:
+    filePath = yaml_in["ResidualBasis"]["files-dir"]
   fileName = yaml_in["ResidualBasis"]["file-root-name"]
   fileFmt = yaml_in["ResidualBasis"]["format"]
 
@@ -106,8 +109,18 @@ indices using random sampling from a probability mass function based on leverage
   numGlobalSamps = yaml_in["SampleMesh"]["num-sample-mesh-nodes"]
   levScoreBeta = yaml_in["SampleMesh"]["leverage-score-beta"]
 
+  # check that inputs are valid, exit with error otherwise
+  if nCols < 1:
+    sys.exit("unsupported input: ResidualBasis/num-columns needs to be greater than 0")
+  if dofsPerMnode < 1:
+    sys.exit("unsupported input: ResidualBasis/dofs-per-mesh-node needs to be greater than 0")
+  if numGlobalSamps < 1:
+    sys.exit("unsupported input: SampleMesh/num-sample-mesh-nodes needs to be greater than 0")
+  if (levScoreBeta < 0) or (levScoreBeta > 1):
+    sys.exit("SampleMesh/leverage-score-beta need to be a decimal between 0.0 and 1.0")
+
   # read matrix
-  psi = array_io.read_array_distributed(comm, fileName, nCols, isBinary)
+  psi = array_io.read_array_distributed(comm, filePath + "/" + fileName, nCols, isBinary)
   myNumRows = psi.extentLocal(0)
 
   # mapping from local to global mesh indicies
@@ -119,6 +132,9 @@ indices using random sampling from a probability mass function based on leverage
   comm.Alltoall(senddata,meshNodesPerRank)
 
   globalInds = np.arange(myNumMeshNodes) + np.sum(meshNodesPerRank[:rank])
+  
+  if np.any(globalInds < 0):
+    sys.exit("Global Indicies must be positive") 
   #print(rank,globalInds)
 
   ########################################################
@@ -161,4 +177,4 @@ indices using random sampling from a probability mass function based on leverage
 
 if __name__ == '__main__':
   comm = MPI.COMM_WORLD
-  run()
+  run(comm)
