@@ -17,12 +17,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-# string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_tolower)
-# if(NOT cmake_build_type_tolower STREQUAL "debug"
-#     AND NOT cmake_build_type_tolower STREQUAL "release")
-#   message(FATAL_ERROR "Unknown build type \"${CMAKE_BUILD_TYPE}\".
-#     Allowed values are Debug, Release (case-insensitive).")
-# endif()
 ### default to release if build type is empty ###
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "${CMAKE_BUILD_TYPE} is not specified, defaulting to Release.")
@@ -50,12 +44,3 @@ target_compile_definitions(pressiotools PRIVATE VERSION_IN=${VERSION_INFO})
 target_include_directories(pressiotools PRIVATE ${TRILINOS_ROOT}/include)
 target_link_directories(pressiotools PRIVATE ${TRILINOS_ROOT}/lib)
 target_link_libraries(pressiotools PRIVATE ${TRILINOS_LIB_NAMES})
-
-#add_subdirectory(tests)
-# link_libraries(${CMAKE_DL_LIBS})
-# include(GNUInstallDirs)
-# include(tplEigen)
-# include(tplMPI)
-# include(tplBlas)
-# include(tplLapack)
-# link_libraries(${CMAKE_DL_LIBS})

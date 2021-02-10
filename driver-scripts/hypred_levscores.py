@@ -1,7 +1,9 @@
 
 import pathlib, sys
+
 file_path = pathlib.Path(__file__).parent.absolute()
 sys.path.append(str(file_path) + "/../..")
+sys.path.append(str(file_path) + "/../srcpy")
 
 import argparse
 import numpy as np
@@ -23,7 +25,7 @@ def leverageScorePMF(l_scores,pmf_blend):
 
 def computeBlockPMF(l_scores, dofsPerMnode, pmf_blend=0.5):
   # compute pmf for each mesh node by summing over mesh DoF pmf entries
-  pmf_allDofs = leverageScorePMF(l_scores, pmf_blend) 
+  pmf_allDofs = leverageScorePMF(l_scores, pmf_blend)
 
   # sum up probability mass for each mesh node
   myNumMeshNodes = int(l_scores.extentLocal()/dofsPerMnode)
@@ -31,7 +33,7 @@ def computeBlockPMF(l_scores, dofsPerMnode, pmf_blend=0.5):
   pmf_meshDofs.data()[:] = np.zeros(pmf_meshDofs.extentLocal())
 
   # sum up probabilities for each mesh DoF
-  # assumes that nodal quantities are fastest index 
+  # assumes that nodal quantities are fastest index
   # e.g. mass, momentum, energy for each node are grouped together in residual vector
   pmf_allDofs = np.reshape(pmf_allDofs,(myNumMeshNodes,dofsPerMnode))
 
@@ -70,34 +72,34 @@ def samplePMF(comm,pmf,numSampsGlobal):
 
   return np.random.choice(localInds, myNumSamps, p=local_pmf)
 
-def run():
-  comm = MPI.COMM_WORLD
+def run(comm):
   rank = comm.Get_rank()
   size = comm.Get_size()
 
   # Get inputs
-  parser = argparse.ArgumentParser(description="Generate sample mesh indices using random sampling from a probability mass function based on leverage scores")
-  parser.add_argument('--input',help="path to (and inclding) yaml input file. ",required=True)
+  parser = argparse.ArgumentParser(description="Generate sample mesh \
+indices using random sampling from a probability mass function based on leverage scores")
+  parser.add_argument('--input',help="full path to (and including) yaml input file. ",required=True)
   args = parser.parse_args()
-  
-  yaml_in = yaml_read(args.input) 
+
+  yaml_in = yaml_read(args.input)
 
   # read user inputs
   # TODO yaml parser
   fileName = yaml_in["ResidualBasis"]["residual-basis-root-name"]
   fileFmt = yaml_in["ResidualBasis"]["residual-basis-format"]
-  
+
   isBinary=False
   if fileFmt=="binary":
     isBinary=True
     if rank==0:
       print("Reading from binary files")
   elif fileFmt=="ascii":
-    if rank==0:  
+    if rank==0:
       print("Reading from ascii files")
   else:
     sys.exit("Unsupported file format: residual-basis-format must be 'binary' or 'ascii'.")
-    
+
 
   nCols = yaml_in["ResidualBasis"]["num-residual-basis-columns"]
   dofsPerMnode = yaml_in["ResidualBasis"]["dofs-per-mesh-node"]
@@ -106,18 +108,18 @@ def run():
   levScoreBeta = yaml_in["SampleMesh"]["leverage-score-beta"]
 
   # read matrix
-  psi = array_io.read_array_distributed(fileName,nCols,isBinary)
+  psi = array_io.read_array_distributed(comm, fileName, nCols, isBinary)
   myNumRows = psi.extentLocal(0)
-  
+
   # TODO mapping from local to global mesh indicies
-  # if none is provided, assume that global indices are: 
+  # if none is provided, assume that global indices are:
   # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
   myNumMeshNodes = int(myNumRows/dofsPerMnode)
   senddata = myNumMeshNodes*np.ones(size,dtype=np.int)
   meshNodesPerRank = np.empty(size,dtype=np.int)
   comm.Alltoall(senddata,meshNodesPerRank)
 
-  globalInds = np.arange(myNumMeshNodes) + np.sum(meshNodesPerRank[:rank]) 
+  globalInds = np.arange(myNumMeshNodes) + np.sum(meshNodesPerRank[:rank])
   #print(rank,globalInds)
 
   ########################################################
@@ -142,7 +144,7 @@ def run():
     mySampleMeshNodes = globalInds[mySampleMeshNodes]
 
   #print("Sample mesh node indices on rank {}:".format(rank),mySampleMeshNodes)
-  
+
   # write sample mesh nodes to disk
   # gather array at rank 0
   sampleMeshNodes = comm.gather(mySampleMeshNodes, root=0)
@@ -159,4 +161,5 @@ def run():
 
 
 if __name__ == '__main__':
+  comm = MPI.COMM_WORLD
   run()

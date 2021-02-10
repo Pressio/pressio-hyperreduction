@@ -1,0 +1,9 @@
+ResidualBasis:
+  dofs-per-mesh-node: 1
+  num-mesh-nodes: 15
+  num-residual-basis-columns: 4
+  residual-basis-format: binary
+  residual-basis-root-name: matrix.bin
+SampleMesh:
+  leverage-score-beta: 0.5
+  num-sample-mesh-nodes: 9

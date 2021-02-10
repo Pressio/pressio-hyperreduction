@@ -9,7 +9,9 @@
 
 - computation of sample mesh indices for hyper-reduction via
 
-	- TBD
+	- leverage scores using algorithm 5.1 of [this paper](https://arxiv.org/pdf/1903.00911.pdf)
+
+	- more methods to come
 
 `pressio-tools` is being developed as an auxiliary library to the [pressio C++ library](https://pressio.github.io/pressio/html/index.html) and its [Python bindings library](https://pressio.github.io/pressio4py/html/index.html).
 
@@ -25,13 +27,20 @@ See the [wiki page](https://github.com/Pressio/pressio-tools/wiki/Requirements-a
 
 # Usage
 
-- Interested in the QR factorizaton?
+- Interested in the *QR* factorizaton?
   - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/qr.py).
   - To run it: `cd demos; mpirun -n 4 python3 qr.py`
 
-- Interested in the SVD functionality?
+- Interested in the *SVD* functionality?
   - Look at the [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/svd.py).
   - To run it: `cd demos; mpirun -n 4 python3 svd.py`
+
+- Interested in the *Sample Mesh* functionality based on leverage scores?
+  - You can run the demo as:
+  ```bash
+  cd pressio-tools/driver-scripts
+  mpirun -n 4 python3 hypred_levscores.py --input pressio-tools/demos/levscores/input.yaml`
+  ```
 
 # Questions?
 Find us on Slack: https://pressioteam.slack.com or open an issue on [github](https://github.com/Pressio/pressio-tools).

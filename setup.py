@@ -169,7 +169,7 @@ setup(
   long_description=description(),
   ext_modules=[CMakeExtension("pressio-tools")],
   cmdclass={"build_ext": CMakeBuild},
-  install_requires=["numpy", "scipy", "mpi4py"],
+  install_requires=["numpy", "scipy", "mpi4py", "pyyaml"],
   zip_safe=False,
   #
   python_requires='>=3',

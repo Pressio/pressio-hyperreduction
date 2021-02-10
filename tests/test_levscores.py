@@ -1,7 +1,7 @@
 
 import pathlib, sys
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../..")
+file_path = pathlib.Path(__file__).parent.absolute()#
+# this is needed to access the levscores python code
 sys.path.append(str(file_path) + "/../driver-scripts")
 
 import numpy as np
@@ -37,11 +37,23 @@ def run():
 
   # check leverage scores against truth values
   if rank == 0:
-    l_scores_truth_lcl = np.array([0.49781725640571, 0.44080349621974, 2.35742451093826, 1.15014097270538, 0.07248648067393])
+    l_scores_truth_lcl = np.array([0.49781725640571,
+                                   0.44080349621974,
+                                   2.35742451093826,
+                                   1.15014097270538,
+                                   0.07248648067393])
   elif rank == 1:
-    l_scores_truth_lcl = np.array([1.43282248176162, 2.74311764577994, 0.41537324804313, 1.43317716202619, 1.15354421701282])
+    l_scores_truth_lcl = np.array([1.43282248176162,
+                                   2.74311764577994,
+                                   0.41537324804313,
+                                   1.43317716202619,
+                                   1.15354421701282])
   elif rank == 2:
-    l_scores_truth_lcl = np.array([1.53902367978074, 1.03977559500014, 0.81731094949638, 0.63384371442751, 1.34991091068034])
+    l_scores_truth_lcl = np.array([1.53902367978074,
+                                   1.03977559500014,
+                                   0.81731094949638,
+                                   0.63384371442751,
+                                   1.34991091068034])
   else:
     l_scores_truth_lcl = None
 
@@ -57,11 +69,23 @@ def run():
 
   # check PMF against truth values
   if rank == 0:
-    l_scores_pmf_truth_lcl = np.array([0.0479093632019, 0.04624000710647, 0.10235844172836, 0.06700932378062, 0.03545572883846])
+    l_scores_pmf_truth_lcl = np.array([0.0479093632019,
+                                       0.04624000710647,
+                                       0.10235844172836,
+                                       0.06700932378062,
+                                       0.03545572883846])
   elif rank == 1:
-    l_scores_pmf_truth_lcl = np.array([0.07528620463654, 0.11365149069605, 0.04549541247417, 0.07529658963237, 0.06710897036787])
+    l_scores_pmf_truth_lcl = np.array([0.07528620463654,
+                                       0.11365149069605,
+                                       0.04549541247417,
+                                       0.07529658963237,
+                                       0.06710897036787])
   elif rank == 2:
-    l_scores_pmf_truth_lcl = np.array([0.07839576304273, 0.06377783869008, 0.05726410041396, 0.05189220166225, 0.0728585637282 ])
+    l_scores_pmf_truth_lcl = np.array([0.07839576304273,
+                                       0.06377783869008,
+                                       0.05726410041396,
+                                       0.05189220166225,
+                                       0.0728585637282])
   else:
     l_scores_pmf_truth_lcl = None
 

@@ -1,6 +1,6 @@
 import pathlib, sys
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../..")
+#file_path = pathlib.Path(__file__).parent.absolute()
+#sys.path.append(str(file_path) + "/../..")
 
 import numpy as np
 from mpi4py import MPI
@@ -9,7 +9,7 @@ import math
 
 # Binary IO
 def read_binary_array(fileName,nCols):
-  # read a numpy array from a binary file "fileName".bin
+  # read a numpy array from a binary file "fileName"
   if nCols==1:
     return np.fromfile(fileName)
   else:
@@ -46,36 +46,31 @@ def write_array(arr,fileName,isBinary=True):
     return write_ascii_array(arr,fileName)
 
 # Distributed IO
-def read_array_distributed(fileName,nCols,isBinary=True):
-  # Read an array from binary  or ascii files with the name specified by the string fileName
-  # Each local array segment will be written to a file fileName.XX.YY, 
+def read_array_distributed(comm, rootFileName,nCols,isBinary=True):
+  # Read an array from binary or ascii files with the name specified by the string rootFileName
+  # Each local array segment will be read from a file rootFileName.XX.YY,
   # where XX is the number of ranks and YY is the local rank
-  comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
   size = comm.Get_size()
 
   nDigit = int(math.log10(size)) + 1
-
-  # write array portion on each processor
-  myFileName = "{}.{}.{:0{width}d}".format(fileName,size,rank,width=nDigit)
+  myFileName = "{}.{}.{:0{width}d}".format(rootFileName,size,rank,width=nDigit)
   myArr = read_array(myFileName,nCols,isBinary)
-  
+
   if nCols==1:
-    return pt.Vector(myArr)    
+    return pt.Vector(myArr)
   else:
     return pt.MultiVector(myArr)
 
-def write_array_distributed(arr,fileName,isBinary=True):
-  # Write array arr to binary or ascii files with the name specified by the string fileName
-  # Each local array segment will be written to a file fileName.XX.YY, 
+def write_array_distributed(comm, arr,rootFileName,isBinary=True):
+  # Write array arr to binary or ascii files with the name specified by the string rootFileName
+  # Each local array segment will be written to a file rootFileName.XX.YY,
   # where XX is the number of ranks and YY is the local rank
-  comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
   size = comm.Get_size()
 
   nDigit = int(math.log10(size)) + 1
-
   # write BaseVector portion on each processor
-  myFileName = "{}.{}.{:0{width}d}".format(fileName,size,rank,width=nDigit)
+  myFileName = "{}.{}.{:0{width}d}".format(rootFileName,size,rank,width=nDigit)
   myArr = arr.data()
   write_array(myArr,myFileName,isBinary)

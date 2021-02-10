@@ -1,8 +1,5 @@
 
 import pathlib, sys
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../..")
-
 import numpy as np
 import pressiotools as pt
 
