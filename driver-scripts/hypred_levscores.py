@@ -21,7 +21,7 @@ def leverageScores(ls, A):
 def leverageScorePMF(l_scores,pmf_blend):
   # returns numpy vector of pmf entries corresponding to vector l_scores
   r = l_scores.sumGlobal() # should be equal to number of rows for an orthonormal matrix
-  return pmf_blend * l_scores.data() / r + pmf_blend / l_scores.extentGlobal()
+  return pmf_blend * l_scores.data() / r + (1.0-pmf_blend) / l_scores.extentGlobal()
 
 def computeBlockPMF(l_scores, dofsPerMnode, pmf_blend=0.5):
   # compute pmf for each mesh node by summing over mesh DoF pmf entries
