@@ -35,22 +35,7 @@ def run():
     print(mat0)
     print("---------\n")
 
-  # serial read
-  if rank==0:
-    mat0_gold = read_array("matrix.bin.gold",numCols)
-    assert(np.all(np.abs(mat0_gold - mat0) < tol))
-
-    vec0_gold = read_array("vector.bin.gold",1)
-    assert(np.all(np.abs(vec0_gold - vec0) < tol))
-
-  # distributed read
-  mat_gold = read_array_distributed(comm, "matrix.bin.gold",numCols)
-  assert(np.all(np.abs(mat_gold.data() - mat.data()) < tol))
-
-  vec_gold = read_array_distributed(comm, "vector.bin.gold",1)
-  assert(np.all(np.abs(vec_gold.data() - vec.data()) < tol))
-
-  # serial write
+  # serial write/read
   if rank==0:
     write_array(mat0,"matrix.bin")
     mat0_in = read_array("matrix.bin",numCols)
@@ -60,7 +45,7 @@ def run():
     vec0_in = read_array("vector.bin",1)
     assert(np.all(np.abs(vec0_in - vec0) < tol))
 
-  # distributed write
+  # distributed write/read
   write_array_distributed(comm, mat,"matrix.bin")
   mat_in = read_array_distributed(comm, "matrix.bin",numCols)
   assert(np.all(np.abs(mat_in.data() - mat.data()) < tol))
