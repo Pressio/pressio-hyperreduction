@@ -1,16 +1,12 @@
 
 import pathlib, sys
 import numpy as np
-from mpi4py import MPI
 import pressiotools as pt
 
 np.set_printoptions(linewidth=140)
 
-def tsqr_run():
-  comm = MPI.COMM_WORLD
+def tsqr_run(comm):
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 1)
-
   np.random.seed(312367)
   A = np.asfortranarray(np.random.rand(10,4))
   print(A)
@@ -28,11 +24,8 @@ def tsqr_run():
   # R_add = R.__array_interface__['data'][0]
   # print("R: ", R_add)
 
-def tsqr_fancy_indexing():
-  comm = MPI.COMM_WORLD
+def tsqr_fancy_indexing(comm):
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 1)
-
   np.random.seed(312367)
   A = np.asfortranarray(np.random.rand(10,4))
 
@@ -54,5 +47,9 @@ def tsqr_fancy_indexing():
   assert(np.allclose(np.abs(R1),np.abs(R), atol=1e-10))
 
 if __name__ == '__main__':
-  tsqr_run()
-  tsqr_fancy_indexing()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  assert(comm.Get_size() == 1)
+
+  tsqr_run(comm)
+  tsqr_fancy_indexing(comm)

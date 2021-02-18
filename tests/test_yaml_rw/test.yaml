@@ -1,11 +1,12 @@
-ResidualBasis: 
-  files-dir: "."
+
+ResidualBasis:
   file-root-name: "matrix.bin"
   format: "binary"
   num-columns: 4
   num-mesh-nodes: 15
   dofs-per-mesh-node: 1
-SampleMesh: 
+
+SampleMesh:
   num-sample-mesh-nodes: 8
   leverage-score-beta: 0.5
-  #sample-mesh-seed-nodes: "seed.txt" # Optional 
+  #sample-mesh-seed-nodes: "seed.txt" # Optional

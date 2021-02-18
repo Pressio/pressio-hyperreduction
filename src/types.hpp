@@ -4,7 +4,10 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+
+#ifdef PRESSIOTOOLS_ENABLE_TPL_MPI
 #include "mpi.h"
+#endif
 
 namespace pressiotools
 {

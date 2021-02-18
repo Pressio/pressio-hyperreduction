@@ -1,14 +1,13 @@
 
 import sys
 import numpy as np
-from mpi4py import MPI
 import pressiotools
 
 np.set_printoptions(linewidth=140)
 
-def run():
+def run(comm):
   '''
-  this demo shows how to compute the parallel SVD
+  this demo shows how to compute the parallel QR factorization
   over N ranks of a block-row distributed random matrix A.
 
   Suppose A is a 100x5 matrix such that it is
@@ -29,12 +28,7 @@ def run():
 
   Each rank owns 25 rows and all columns of A.
   '''
-
-  comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
-  if (comm.Get_size() != 4):
-    print("Rerun with 4 ranks")
-    sys.exit()
 
   # fix seed for reproducibility
   np.random.seed(312367)
@@ -54,25 +48,35 @@ def run():
   # in native C++ without performance hit
   A = pressiotools.MultiVector(myLocalRandPiece)
 
-  # construct a SVD object
-  svdO = pressiotools.svd()
-  # comptue thin svd
-  svdO.computeThin(A)
+  # construct a Tsqr object
+  qrO = pressiotools.Tsqr()
+  # comptue the QR factorization of A
+  qrO.computeThinOutOfPlace(A)
 
-  # U is a numpy array viewing the local piece
-  U = svdO.viewLeftSingVectorsLocal()
+  # the R factor (5x5 upper tridiagonal matrix) is replicated on all ranks
+  # R is a numpy array that you can use as you want.
+  # Note that R is owned by the qr object.
+  R = qrO.viewR()
+  print("Rank = {}, R.shape = {}".format(rank, R.shape))
 
-  # S contains the sing values, replicated on each rank
-  S = svdO.viewSingValues()
+  # the Q matrix is block-row distributed in the same way A is
+  # so viewing the LocalQ here means that you only access
+  # the rows of Q that belong to this rank
+  # Q is a numpy array that you can use as needed.
+  # Note that Q is owned by the qr object.
+  Q = qrO.viewQLocal()
+  print("Rank = {}, Q.shape = {}".format(rank, Q.shape))
 
-  # VT contains the transpose of the right-vectors, replicated on each rank
-  VT = svdO.viewRightSingVectorsT()
-
-  print("Rank = {}, U.shape = {}, S.shape = {}, VT.shape = {}".format(
-    rank, U.shape, S.shape, VT.shape))
+  # note: the above methods are called "view" because NO copy is made
 
 if __name__ == '__main__':
   '''
-  run with:  mpirun -np 4 python3 svd.py
+  run with:  mpirun -np 4 python3 qr.py
   '''
-  run()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  if (comm.Get_size() != 4):
+    print("Rerun with 4 ranks")
+    sys.exit()
+
+  run(comm)

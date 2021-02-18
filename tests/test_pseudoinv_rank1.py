@@ -1,17 +1,13 @@
 
 import pathlib, sys
 import numpy as np
-from mpi4py import MPI
 import pressiotools as pt
 import scipy.linalg as la
 
 np.set_printoptions(linewidth=140)
 
-def pinv_run():
-  comm = MPI.COMM_WORLD
+def pinv_run(comm):
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 1)
-
   np.random.seed(312367)
   A = np.asfortranarray(np.random.rand(10,4))
 
@@ -26,12 +22,8 @@ def pinv_run():
 
   assert(np.allclose(B.T, AstarT, atol=1e-10))
 
-def pinv_apply():
+def pinv_apply(comm):
   print("\n")
-  comm = MPI.COMM_WORLD
-  rank = comm.Get_rank()
-  assert(comm.Get_size() == 1)
-
   np.random.seed(312367)
 
   # create the matrix
@@ -57,5 +49,9 @@ def pinv_apply():
 
 
 if __name__ == '__main__':
-  pinv_run()
-  pinv_apply()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  assert(comm.Get_size() == 1)
+
+  pinv_run(comm)
+  pinv_apply(comm)

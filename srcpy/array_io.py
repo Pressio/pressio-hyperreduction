@@ -1,14 +1,12 @@
-import pathlib, sys
-#file_path = pathlib.Path(__file__).parent.absolute()
-#sys.path.append(str(file_path) + "/../..")
 
 import numpy as np
-from mpi4py import MPI
-import pressiotools as pt
 import math
+import pressiotools as pt
 
-# Binary IO
-def read_binary_array(fileName,nCols):
+# --------------------
+# reading functions
+# --------------------
+def read_binary_array(fileName, nCols):
   # read a numpy array from a binary file "fileName"
   if nCols==1:
     return np.fromfile(fileName)
@@ -17,37 +15,19 @@ def read_binary_array(fileName,nCols):
     nRows = int(len(array) / float(nCols))
     return array.reshape((nCols,nRows)).T
 
-def write_binary_array(arr,fileName):
-  # write numpy array arr to a binary file "fileName"
-  f = open(fileName,'w')
-  arr.T.tofile(f)
-  f.close()
-
-# Ascii IO
-def read_ascii_array(fileName,nCols):
+def read_ascii_array(fileName, nCols):
   # read a numpy array from an ascii file "fileName"
   return np.asfortranarray(np.loadtxt(fileName))
 
-def write_ascii_array(arr,fileName):
-  # write numpy array arr to an ascii file "fileName"
-  np.savetxt(fileName,arr)
-
-# Optional IO
-def read_array(fileName,nCols,isBinary=True):
+def read_array(fileName, nCols, isBinary=True):
   if isBinary:
     return read_binary_array(fileName,nCols)
   else:
     return read_ascii_array(fileName,nCols)
 
-def write_array(arr,fileName,isBinary=True):
-  if isBinary:
-    return write_binary_array(arr,fileName)
-  else:
-    return write_ascii_array(arr,fileName)
-
-# Distributed IO
-def read_array_distributed(comm, rootFileName,nCols,isBinary=True):
-  # Read an array from binary or ascii files with the name specified by the string rootFileName
+def read_array_distributed(comm, rootFileName, nCols, isBinary=True):
+  # Read an array from binary or ascii files with the name specified
+  # by the string rootFileName
   # Each local array segment will be read from a file rootFileName.XX.YY,
   # where XX is the number of ranks and YY is the local rank
   rank = comm.Get_rank()
@@ -62,7 +42,26 @@ def read_array_distributed(comm, rootFileName,nCols,isBinary=True):
   else:
     return pt.MultiVector(myArr)
 
-def write_array_distributed(comm, arr,rootFileName,isBinary=True):
+# --------------------
+# writing functions
+# --------------------
+def write_binary_array(arr, fileName):
+  # write numpy array arr to a binary file "fileName"
+  f = open(fileName,'w')
+  arr.T.tofile(f)
+  f.close()
+
+def write_ascii_array(arr, fileName):
+  # write numpy array arr to an ascii file "fileName"
+  np.savetxt(fileName,arr)
+
+def write_array(arr, fileName, isBinary=True):
+  if isBinary:
+    return write_binary_array(arr,fileName)
+  else:
+    return write_ascii_array(arr,fileName)
+
+def write_array_distributed(comm, arr, rootFileName, isBinary=True):
   # Write array arr to binary or ascii files with the name specified by the string rootFileName
   # Each local array segment will be written to a file rootFileName.XX.YY,
   # where XX is the number of ranks and YY is the local rank

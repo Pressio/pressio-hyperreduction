@@ -1,9 +1,9 @@
 
 ResidualBasis:
-  residual-basis-root-name: "matrix.bin"
-  residual-basis-format: "binary"
-  num-residual-basis-columns: 4
-  num-mesh-nodes: 15
+  file-root-name: "matrix.txt"
+  format: "ascii"
+  num-columns: 4
+  num-mesh-nodes: 24
   dofs-per-mesh-node: 1
 
 SampleMesh:

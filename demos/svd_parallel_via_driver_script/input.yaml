@@ -1,0 +1,10 @@
+
+SVD:
+  file-root-name: "matrix.txt"
+  format: "ascii"
+  num-columns: 4
+
+  leftSingularVectors:
+    file-root-name: "lsv.txt"
+    write-format: "ascii"
+    how-many: 2

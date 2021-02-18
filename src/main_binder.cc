@@ -2,12 +2,16 @@
 #ifndef PRESSIOTOOLS_MAIN_BINDER_HPP_
 #define PRESSIOTOOLS_MAIN_BINDER_HPP_
 
+#include <iostream>
 #include "types.hpp"
-#include "./data_structures/multivector.hpp"
 #include "./data_structures/vector.hpp"
+#include "./data_structures/multivector.hpp"
+
+#ifdef PRESSIOTOOLS_ENABLE_TPL_TRILINOS
 #include "tsqr.hpp"
 #include "svd.hpp"
 #include "pinv.hpp"
+#endif
 
 #define PT_STRINGIFY(x) #x
 #define PT_MACRO_STRINGIFY(x) PT_STRINGIFY(x)
@@ -16,15 +20,6 @@ PYBIND11_MODULE(pressiotools, mParent)
 {
   mParent.attr("__version__") = PT_MACRO_STRINGIFY(VERSION_IN);
 
-  // bind multivector
-  using mv_t = pressiotools::MultiVector;
-  pybind11::class_<mv_t> mv(mParent, "MultiVector");
-  mv.def(pybind11::init<pressiotools::py_f_arr>());
-  mv.def(pybind11::init<pressiotools::py_c_arr>());
-  mv.def("data", &mv_t::data);
-  mv.def("extentLocal", &mv_t::extentLocal);
-  mv.def("extentGlobal", &mv_t::extentGlobal);
-
   // bind vector
   using v_t = pressiotools::Vector;
   pybind11::class_<v_t> vec(mParent, "Vector");
@@ -32,10 +27,28 @@ PYBIND11_MODULE(pressiotools, mParent)
   vec.def(pybind11::init<pressiotools::py_c_arr>());
   vec.def(pybind11::init<pybind11::ssize_t>());
   vec.def("data", &v_t::data);
-  vec.def("extentLocal", &v_t::extentLocal);
+  vec.def("extentLocal",  &v_t::extentLocal);
   vec.def("extentGlobal", &v_t::extentGlobal);
-  vec.def("sumGlobal", &v_t::sumGlobal);
+  vec.def("sumGlobal",	  &v_t::sumGlobal);
+  vec.def("sumLocal",     &v_t::sumLocal);
+#ifndef PRESSIOTOOLS_ENABLE_TPL_MPI
+  vec.def("extent", &v_t::extent);
+  vec.def("sum",    &v_t::sum);
+#endif
 
+  // bind multivector
+  using mv_t = pressiotools::MultiVector;
+  pybind11::class_<mv_t> mv(mParent, "MultiVector");
+  mv.def(pybind11::init<pressiotools::py_f_arr>());
+  mv.def(pybind11::init<pressiotools::py_c_arr>());
+  mv.def("data", &mv_t::data);
+  mv.def("extentLocal",  &mv_t::extentLocal);
+  mv.def("extentGlobal", &mv_t::extentGlobal);
+#ifndef PRESSIOTOOLS_ENABLE_TPL_MPI
+  mv.def("extent", &mv_t::extent);
+#endif
+
+#ifdef PRESSIOTOOLS_ENABLE_TPL_TRILINOS
   // bind tsqr
   using tsqr_t = pressiotools::Tsqr;
   pybind11::class_<tsqr_t> tsqr(mParent, "Tsqr");
@@ -65,5 +78,7 @@ PYBIND11_MODULE(pressiotools, mParent)
 	   &pinv_t::viewLocalAstarT, pybind11::return_value_policy::reference);
   pinv.def("apply",
 	   &pinv_t::apply, pybind11::return_value_policy::reference);
+#endif
 };
+
 #endif

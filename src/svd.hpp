@@ -71,7 +71,9 @@ struct Svd
 		one, teuchosQ, Ur_, zero);
   }
 
-  pressiotools::py_f_arr viewS(){ return S_; }
+  pressiotools::py_f_arr viewS(){
+    return S_;
+  }
 
   pressiotools::py_f_arr viewU(){
     pressiotools::py_f_arr view({U_.numRows(), U_.numCols()}, U_.values());

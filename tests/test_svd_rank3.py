@@ -1,17 +1,13 @@
 
 import pathlib, sys
 import numpy as np
-from mpi4py import MPI
 import pressiotools as pt
 import scipy.linalg.lapack as la
 
 np.set_printoptions(linewidth=140)
 
-def svd_run():
-  comm = MPI.COMM_WORLD
+def svd_run(comm):
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 3)
-
   np.random.seed(312367)
   # create the matrix A and use scipy QR
   A = np.asfortranarray(np.random.rand(15,4))
@@ -45,6 +41,8 @@ def svd_run():
   myU0 = U0[myStartRow:myStartRow+5, :]
   assert(np.allclose(np.abs(myU0),np.abs(U1), atol=1e-10))
 
-
 if __name__ == '__main__':
-  svd_run()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  assert(comm.Get_size() == 3)
+  svd_run(comm)

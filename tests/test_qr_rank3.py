@@ -1,16 +1,12 @@
 
 import pathlib, sys
 import numpy as np
-from mpi4py import MPI
 import pressiotools as pt
 
 np.set_printoptions(linewidth=140)
 
-def tsqr_run():
-  comm = MPI.COMM_WORLD
+def tsqr_run(comm):
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 3)
-
   np.random.seed(312367)
 
   # create the matrix A and use scipy QR
@@ -35,4 +31,8 @@ def tsqr_run():
 
 
 if __name__ == '__main__':
-  tsqr_run()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  assert(comm.Get_size() == 3)
+
+  tsqr_run(comm)

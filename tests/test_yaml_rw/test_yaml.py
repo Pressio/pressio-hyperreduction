@@ -11,7 +11,6 @@ def run():
   yaml_in = yaml_read("test.yaml")
 
   print(yaml_in)
-  assert(yaml_in["ResidualBasis"]["files-dir"]==".")
   assert(yaml_in["ResidualBasis"]["file-root-name"]=="matrix.bin")
   assert(yaml_in["ResidualBasis"]["format"]=="binary")
   assert(yaml_in["ResidualBasis"]["num-columns"]==4)

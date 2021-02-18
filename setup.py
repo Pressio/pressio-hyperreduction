@@ -8,16 +8,177 @@
 import os
 import sys
 import subprocess
-
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+from setuptools.command.install import install as _install
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 
-def description():
-    with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
-        return f.read()
+# ----------------------------------------------
+# Metadata
+# ----------------------------------------------
+def myname():
+  return "pressio-tools"
 
+def myversion():
+  return "0.6.1rc1"
+
+def description():
+  with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
+    return f.read()
+
+# # ----------------------------------------------
+# # Trilinos build for serial
+# # ----------------------------------------------
+# def trilinos_for_serial_build(buildDir):
+#   trilTarName = "trilinos-release-13-0-1.tar.gz"
+#   trilUnpackedName = "Trilinos-trilinos-release-13-0-1"
+#   trilUrl = "https://github.com/trilinos/Trilinos/archive/"+trilTarName
+
+#   cwd = os.getcwd()
+
+#   # create subdirs for trilinos
+#   trilinosSubDir = cwd + "/"+buildTemp+"/../trilinos"
+#   if not os.path.exists(trilinosSubDir): os.makedirs(trilinosSubDir)
+
+#   trilTarPath = trilinosSubDir+"/"+trilTarName
+#   print("trilTarPath ", trilTarPath)
+#   if not os.path.exists(trilTarPath):
+#     subprocess.check_call(
+#       ["wget", "--no-check-certificate", trilUrl], cwd=trilinosSubDir
+#     )
+
+#   trilSrcDir = trilinosSubDir+"/"+trilUnpackedName
+#   print("trilSrcPath ", trilSrcDir)
+#   if not os.path.exists(trilSrcDir):
+#     subprocess.check_call(
+#       ["tar", "zxf", trilTarName], cwd=trilinosSubDir
+#     )
+
+#   trilBuildDir = trilinosSubDir+"/build"
+#   print("trilBuildDir = ", trilBuildDir)
+#   trilInstallDir = trilinosSubDir+"/install"
+#   print("trilInstall = ", trilInstallDir)
+
+#   cmake_args = [
+#     "-DCMAKE_BUILD_TYPE={}".format("Release"),
+#     "-DBUILD_SHARED_LIBS={}".format("ON"),
+#     "-DCMAKE_C_COMPILER={}".format(os.environ.get("CC")),
+#     "-DCMAKE_CXX_COMPILER={}".format(os.environ.get("CXX")),
+#     "-DCMAKE_FC_COMPILER={}".format(os.environ.get("FC")),
+#     "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
+#     "-DTrilinos_ENABLE_Kokkos={}".format("OFF"),
+#     "-DTrilinos_ENABLE_TeuchosNumerics={}".format("ON"),
+#     "-DCMAKE_INSTALL_PREFIX={}".format(trilInstallDir),
+#   ]
+
+#   if not os.path.exists(trilBuildDir):
+#     os.makedirs(trilBuildDir)
+
+#     subprocess.check_call(
+#       ["cmake", trilSrcDir] + cmake_args, cwd=trilBuildDir
+#     )
+#     subprocess.check_call(
+#       ["cmake", "--build", ".", "-j4"], cwd=trilBuildDir
+#     )
+#     subprocess.check_call(
+#       ["cmake", "--install", "."], cwd=trilBuildDir
+#     )
+
+#   # set env var
+#   os.environ["TRILINOS_ROOT"] = trilInstallDir
+
+
+# ----------------------------------------------
+# Trilinos build for mpi
+# ----------------------------------------------
+def trilinos_for_mpi_build(buildDir):
+  trilTarName = "trilinos-release-13-0-1.tar.gz"
+  trilUnpackedName = "Trilinos-trilinos-release-13-0-1"
+  trilUrl = "https://github.com/trilinos/Trilinos/archive/"+trilTarName
+
+  cwd = os.getcwd()
+
+  # create subdirs for trilinos
+  trilinosSubDir = cwd + "/"+self.build_temp+"/../trilinos"
+  if not os.path.exists(trilinosSubDir): os.makedirs(trilinosSubDir)
+
+  trilTarPath = trilinosSubDir+"/"+trilTarName
+  print("trilTarPath ", trilTarPath)
+  if not os.path.exists(trilTarPath):
+    subprocess.check_call(
+      ["wget", "--no-check-certificate", trilUrl], cwd=trilinosSubDir
+    )
+
+  trilSrcDir = trilinosSubDir+"/"+trilUnpackedName
+  print("trilSrcPath ", trilSrcDir)
+  if not os.path.exists(trilSrcDir):
+    subprocess.check_call(
+      ["tar", "zxf", trilTarName], cwd=trilinosSubDir
+    )
+
+  trilBuildDir = trilinosSubDir+"/build"
+  print("trilBuildDir = ", trilBuildDir)
+  trilInstallDir = trilinosSubDir+"/install"
+  print("trilInstall = ", trilInstallDir)
+
+  cmake_args = [
+    "-DCMAKE_BUILD_TYPE={}".format("Release"),
+    "-DBUILD_SHARED_LIBS={}".format("ON"),
+    "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
+    "-DTPL_ENABLE_MPI={}".format("ON"),
+    "-DMPI_BASE_DIR={}".format(os.environ.get("MPI_BASE_DIR")),
+    "-DTrilinos_ENABLE_Tpetra={}".format("ON"),
+    "-DTrilinos_ENABLE_TpetraTSQR={}".format("ON"),
+    "-DTrilinos_ENABLE_Epetra={}".format("ON"),
+    "-DTrilinos_ENABLE_Ifpack={}".format("ON"),
+    "-DTrilinos_ENABLE_Ifpack2={}".format("ON"),
+    "-DTrilinos_ENABLE_Triutils={}".format("ON"),
+    "-DCMAKE_INSTALL_PREFIX={}".format(trilInstallDir),
+  ]
+
+  if not os.path.exists(trilBuildDir):
+    os.makedirs(trilBuildDir)
+
+    subprocess.check_call(
+      ["cmake", trilSrcDir] + cmake_args, cwd=trilBuildDir
+    )
+    subprocess.check_call(
+      ["cmake", "--build", ".", "-j4"], cwd=trilBuildDir
+    )
+    subprocess.check_call(
+      ["cmake", "--install", "."], cwd=trilBuildDir
+    )
+
+  # set env var
+  os.environ["TRILINOS_ROOT"] = trilInstallDir
+
+# ----------------------------------------------
+# overload install command
+# ----------------------------------------------
+class install(_install):
+  user_options = _install.user_options + [
+    ('trilinos-basedir=', None, "Full path to base directory where Trilinos is installed."),
+    ('single-node=', None, "Boolean to tell if you just want a build for single-node.")
+  ]
+
+  def initialize_options(self):
+    _install.initialize_options(self)
+    self.trilinos_basedir = "void"
+    self.single_node = False
+
+  def finalize_options(self):
+    _install.finalize_options(self)
+
+  def run(self):
+    global serialOnly, trilinosBaseDir
+    serialOnly      = self.single_node
+    trilinosBaseDir = self.trilinos_basedir
+    _install.run(self)
+
+# ----------------------------------------------
+# overload build command
+# ----------------------------------------------
 # A CMakeExtension needs a sourcedir instead of a file list.
 class CMakeExtension(Extension):
   def __init__(self, name, sourcedir=""):
@@ -30,160 +191,129 @@ class CMakeBuild(build_ext):
 
     if not extdir.endswith(os.path.sep): extdir += os.path.sep
 
+    # create build directory
     if not os.path.exists(self.build_temp): os.makedirs(self.build_temp)
     print("self.build_temp ", self.build_temp)
+
+    # debug/release mode
+    buildMode = "Debug" if self.debug else "Release"
+    print("self.debug = ", self.debug)
 
     # CMake lets you override the generator - we need to check this.
     # Can be set with Conda-Build, for example.
     cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
-    cfg = "Debug" if self.debug else "Release"
+    #-----------------------
+    # IF ONLY SERIAL IS TRUE
+    #-----------------------
+    if (serialOnly):
+      if "CXX" not in os.environ:
+        msg = "\n **ERROR**: \n CXX env var is missing, needs to point to your C++ compiler"
+        raise RuntimeError(msg)
 
-    if not os.path.exists(self.build_temp):
-      os.makedirs(self.build_temp)
+      # no need (for now) for trilinos in serial version
+      #trilinos_for_serial_build(self.build_temp)
 
-    #-------------------------------------------------------------------
-    # check that MPI_BASE_DIR is in the environment
-    if "MPI_BASE_DIR" not in os.environ:
-      msg = "\n **ERROR**: \n MPI_BASE_DIR env var is missing, needs to point to your MPI installation directory "
-      raise RuntimeError(msg)
-
-    #-------------------------------------------------------------------
-    # TRILINOS
-    #-------------------------------------------------------------------
-    # check if TRILINOS_ROOT is present, if not attemp build
-    trilroot = os.environ.get("TRILINOS_ROOT")
-    print(trilroot)
-    if "TRILINOS_ROOT" not in os.environ or trilroot == "":
-      msg = "TRILINOS_ROOT not found, attempting to build"
-
-      trilTarName = "trilinos-release-13-0-1.tar.gz"
-      trilUnpackedName = "Trilinos-trilinos-release-13-0-1"
-      trilUrl = "https://github.com/trilinos/Trilinos/archive/"+trilTarName
-
-      cwd = os.getcwd()
-
-      # create subdirs for trilinos
-      trilinosSubDir = cwd + "/"+self.build_temp+"/../trilinos"
-      if not os.path.exists(trilinosSubDir): os.makedirs(trilinosSubDir)
-
-      trilTarPath = trilinosSubDir+"/"+trilTarName
-      print("trilTarPath ", trilTarPath)
-      if not os.path.exists(trilTarPath):
-        subprocess.check_call(
-          ["wget", "--no-check-certificate", trilUrl], cwd=trilinosSubDir
-        )
-
-      trilSrcDir = trilinosSubDir+"/"+trilUnpackedName
-      print("trilSrcPath ", trilSrcDir)
-      if not os.path.exists(trilSrcDir):
-        subprocess.check_call(
-          ["tar", "zxf", trilTarName], cwd=trilinosSubDir
-        )
-
-      trilBuildDir = trilinosSubDir+"/build"
-      print("trilBuildDir = ", trilBuildDir)
-      trilInstallDir = trilinosSubDir+"/install"
-      print("trilInstall = ", trilInstallDir)
-
+      # build/install pressio-tools
       cmake_args = [
-        "-DCMAKE_BUILD_TYPE={}".format("Release"),
-        "-DBUILD_SHARED_LIBS={}".format("ON"),
+        "-DCMAKE_CXX_COMPILER={}".format(os.environ.get("CXX")),
         "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
-        "-DTPL_ENABLE_MPI={}".format("ON"),
-        "-DMPI_BASE_DIR={}".format(os.environ.get("MPI_BASE_DIR")),
-        "-DTrilinos_ENABLE_Tpetra={}".format("ON"),
-        "-DTrilinos_ENABLE_TpetraTSQR={}".format("ON"),
-        "-DTrilinos_ENABLE_Epetra={}".format("ON"),
-        "-DTrilinos_ENABLE_Ifpack={}".format("ON"),
-        "-DTrilinos_ENABLE_Ifpack2={}".format("ON"),
-        "-DTrilinos_ENABLE_Triutils={}".format("ON"),
-        "-DCMAKE_INSTALL_PREFIX={}".format(trilInstallDir),
+        "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
+        "-DPYTHON_EXECUTABLE={}".format(sys.executable),
+        "-DCMAKE_BUILD_TYPE={}".format(buildMode),
+        "-DVERSION_INFO={}".format(self.distribution.get_version()),
       ]
+      build_args = []
 
-      if not os.path.exists(trilBuildDir):
-        os.makedirs(trilBuildDir)
+      if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ: build_args += ["-j4"]
 
-        subprocess.check_call(
-          ["cmake", trilSrcDir] + cmake_args, cwd=trilBuildDir
-        )
-        subprocess.check_call(
-          ["cmake", "--build", ".", "-j4"], cwd=trilBuildDir
-        )
-        subprocess.check_call(
-          ["cmake", "--install", "."], cwd=trilBuildDir
-        )
-
-      # set env var
-      os.environ["TRILINOS_ROOT"] = trilInstallDir
+      subprocess.check_call(
+        ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp
+      )
+      subprocess.check_call(
+        ["cmake", "--build", "."] + build_args, cwd=self.build_temp
+      )
 
     else:
-      msg = "Found env var TRILINOS_ROOT={}".format(os.environ.get("TRILINOS_ROOT"))
+      #-----------------------------
+      # WANT TO USE MPI AND TRILINOS
+      #-----------------------------
+      # check that MPI_BASE_DIR is in the environment
+      if "MPI_BASE_DIR" not in os.environ:
+        msg = "\n **ERROR**: \n MPI_BASE_DIR env var is missing, needs to point to your MPI installation directory "
+        raise RuntimeError(msg)
 
-    #-------------------------------------------------------------------
-    # build/install pressio-tools
-    #-------------------------------------------------------------------
-    cc = os.environ.get("MPI_BASE_DIR")+"/bin/mpicc"
-    cxx = os.environ.get("MPI_BASE_DIR")+"/bin/mpicxx"
-    cmake_args = [
-      "-DCMAKE_C_COMPILER={}".format(cc),
-      "-DCMAKE_CXX_COMPILER={}".format(cxx),
-      "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
-      "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
-      "-DPYTHON_EXECUTABLE={}".format(sys.executable),
-      "-DCMAKE_BUILD_TYPE={}".format(cfg),
-      "-DTRILINOS_ROOT={}".format(os.environ.get("TRILINOS_ROOT")),
-      "-DVERSION_INFO={}".format(self.distribution.get_version()),
-    ]
-    build_args = []
+      # check if trilinos_basedir is present, if not attemp build
+      if trilinosBaseDir == "void":
+        msg = "You did not specify --trilinos-basedir, so attempting to build Trilinos on my own"
+        print(msg)
+        trilinos_for_mpi_build(self.build_temp)
 
-    # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level
-    # across all generators.
-    if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
-      # for now, set parallel level to 4
-      build_args += ["-j4"]
-      # # self.parallel is a Python 3 only way to set parallel jobs by hand
-      # # using -j in the build_ext call, not supported by pip or PyPA-build.
-      # if hasattr(self, "parallel") and self.parallel:
-      #   # CMake 3.12+ only.
-      #   build_args += ["-j{}".format(self.parallel)]
+      else:
+        msg = "Found trilinos base dir={}".format(trilinosBaseDir)
+        print(msg)
 
-    subprocess.check_call(
-      ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp
-    )
-    subprocess.check_call(
-      ["cmake", "--build", "."] + build_args, cwd=self.build_temp
-    )
+      # build/install pressio-tools
+      cc = os.environ.get("MPI_BASE_DIR")+"/bin/mpicc"
+      cxx = os.environ.get("MPI_BASE_DIR")+"/bin/mpicxx"
+      cmake_args = [
+        "-DCMAKE_C_COMPILER={}".format(cc),
+        "-DCMAKE_CXX_COMPILER={}".format(cxx),
+        "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
+        "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
+        "-DPYTHON_EXECUTABLE={}".format(sys.executable),
+        "-DCMAKE_BUILD_TYPE={}".format(buildMode),
+        "-DTRILINOS_ROOT={}".format(trilinosBaseDir),
+        "-DVERSION_INFO={}".format(self.distribution.get_version()),
+      ]
+      build_args = []
 
-setup(
-  name="pressio-tools",
-  version="0.6.1rc1",
-  author="F.Rizzi,P.Blonigan,E.Parish",
-  author_email="TBD",
-  description="pressio-tools",
-  #
-  project_urls={
-    'Source': 'https://github.com/Pressio/pressio-tools'
-  },
-  #
-  long_description=description(),
-  ext_modules=[CMakeExtension("pressio-tools")],
-  cmdclass={"build_ext": CMakeBuild},
-  install_requires=["numpy", "scipy", "mpi4py", "pyyaml"],
-  zip_safe=False,
-  #
-  python_requires='>=3',
-  classifiers=[
-    "License :: OSI Approved :: BSD License",
-    "Operating System :: Unix",
-    "Environment :: MacOS X",
-    "Programming Language :: C++",
-    "Programming Language :: Python :: 3 :: Only",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Scientific/Engineering :: Physics",
-    "Topic :: Software Development :: Libraries",
-    "Development Status :: 4 - Beta"
-  ],
-  keywords=["model reduction", "scientific computing", "dense linear algebra", "HPC"],
-)
+      if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ: build_args += ["-j4"]
+
+      subprocess.check_call(
+        ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp
+      )
+      subprocess.check_call(
+        ["cmake", "--build", "."] + build_args, cwd=self.build_temp
+      )
+
+# -----------------------------
+# setup
+# -----------------------------
+def run_setup():
+  setup(
+    name=myname(),
+    version=myversion(),
+    author="F.Rizzi, P.Blonigan, E.Parish, J.Tencer",
+    author_email="TBD",
+    description="pressio-tools",
+    long_description=description(),
+    #
+    project_urls={
+      'Source': 'https://github.com/Pressio/pressio-tools'
+    },
+    #
+    ext_modules=[CMakeExtension("pressio-tools")],
+    cmdclass={"build_ext": CMakeBuild,
+              "install"  : install},
+    install_requires=["numpy", "scipy", "pyyaml"],
+    zip_safe=False,
+    #
+    python_requires='>=3',
+    classifiers=[
+      "License :: OSI Approved :: BSD License",
+      "Operating System :: Unix",
+      "Environment :: MacOS X",
+      "Programming Language :: C++",
+      "Programming Language :: Python :: 3 :: Only",
+      "Topic :: Scientific/Engineering",
+      "Topic :: Scientific/Engineering :: Mathematics",
+      "Topic :: Scientific/Engineering :: Physics",
+      "Topic :: Software Development :: Libraries",
+      "Development Status :: 4 - Beta"
+    ],
+    keywords=["model reduction", "scientific computing", "dense linear algebra", "HPC"],
+  )
+
+if __name__ == '__main__':
+  run_setup()

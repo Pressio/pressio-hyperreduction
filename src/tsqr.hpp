@@ -5,6 +5,7 @@
 #include "Epetra_MpiComm.h"
 #include "Epetra_MultiVector.h"
 #include "Epetra_TsqrAdaptor.hpp"
+#include <Teuchos_LAPACK.hpp>
 
 namespace pressiotools{
 
@@ -25,11 +26,12 @@ struct Tsqr
 	("The input matrix must have at least as many rows on each processor as there are columns.");
     }
 
+    const int nRowLocal = A.extentLocal(0);
     const long long int nRowGlobal = A.extentGlobal(0);
     const long long int nColGlobal = A.extentGlobal(1);
 
     Epetra_MpiComm comm(A.communicator());
-    Epetra_Map map(nRowGlobal, 0, comm);
+    Epetra_Map map(nRowGlobal, nRowLocal, 0, comm);
 
     // create epetra MV viewing A
     scalar_t * ptr = A.data().mutable_data();
