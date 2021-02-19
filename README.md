@@ -26,7 +26,7 @@ We provide two separate build/installation modes:
 
 - to work *only* on shared-memory data:
   * this basic version involves minimal dependencies and is intended to get you started quickly
-  * see the [wiki page](https://github.com/Pressio/pressio-tools/wiki/MPI-build:-requirements-and-installation).
+  * see the [wiki page](https://github.com/Pressio/pressio-tools/wiki/Sharedmemory-build:-requirements-and-installation).
 
 - to work on potentially distributed-memory data:
   * this more *advanced* version relies on MPI and Trilinos as backend to operate on potentially distributed large-scale data
