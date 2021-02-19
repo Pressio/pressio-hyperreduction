@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 # Authors:
-# Francesco Rizzi (francesco.rizzi@ng-analytics.com)
+# Francesco Rizzi  (francesco.rizzi@ng-analytics.com)
 # Patrick Blonigan (pblonig@sandia.gov)
-# Eric Parish (ejparis@sandia.gov)
-# John Tencer (jtencer@sandia.gov)
+# Eric Parish      (ejparis@sandia.gov)
+# John Tencer      (jtencer@sandia.gov)
 
 import os
 import sys
@@ -159,7 +160,7 @@ def trilinos_for_mpi_build(buildDir):
 class install(_install):
   user_options = _install.user_options + [
     ('trilinos-basedir=', None, "Full path to base directory where Trilinos is installed."),
-    ('single-node=', None, "Boolean to tell if you just want a build for single-node.")
+    ('single-node=',      None, "Boolean to tell if you just want a build for single-node.")
   ]
 
   def initialize_options(self):
@@ -174,11 +175,6 @@ class install(_install):
     global serialOnly, trilinosBaseDir
     serialOnly      = self.single_node
     trilinosBaseDir = self.trilinos_basedir
-    # print("install-lib", self.install_lib)
-    # print("install-purelib", self.install_purelib)
-    # self.install_lib += "/pressiotools"
-    # self.install_purelib = self.install_lib
-    # print("install-purelib", self.install_purelib)
     _install.run(self)
 
 # ----------------------------------------------
@@ -228,7 +224,6 @@ class CMakeBuild(build_ext):
         "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
         "-DPYTHON_EXECUTABLE={}".format(sys.executable),
         "-DCMAKE_BUILD_TYPE={}".format(buildMode),
-        "-DVERSION_INFO={}".format(self.distribution.get_version()),
       ]
       build_args = []
 
@@ -270,7 +265,6 @@ class CMakeBuild(build_ext):
         "-DPYTHON_EXECUTABLE={}".format(sys.executable),
         "-DCMAKE_BUILD_TYPE={}".format(buildMode),
         "-DTRILINOS_ROOT={}".format(trilinosBaseDir),
-        "-DVERSION_INFO={}".format(self.distribution.get_version()),
       ]
       build_args = []
 
@@ -325,7 +319,9 @@ def run_setup():
               "parallel computing",
               "hyper-reduction",
               "HPC"],
-    packages=['pressiotools', 'pressiotools.io', 'pressiotools.samplemesh'],
+    packages=['pressiotools',
+              'pressiotools.io',
+              'pressiotools.samplemesh'],
   )
 
 if __name__ == '__main__':

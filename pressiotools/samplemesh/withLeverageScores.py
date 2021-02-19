@@ -1,9 +1,12 @@
 
 import numpy as np
 import pathlib, sys
-import pressiotools as pt
-import array_io
-from levscores import *
+import pressiotools.linalg as ptla
+from pressiotools.io.array_read import *
+from pressiotools.levscores import *
+
+# all the _fnc are implementation details
+# check the end for the actual publicly exposed function
 
 #-----------------------------------------------------------------
 def _processYamlDictionary(yamlDic):
@@ -49,16 +52,19 @@ def _checkInputsValidity(dic):
 
 #-----------------------------------------------------------------
 def _readData(dic, comm=None):
-  dataDir  = dic["dataDir"]
-  fileName = dic["fileRootName"]
-  nCols    = dic["nCols"]
-  isBinary = dic["isBinary"]
+  dataDir      = dic["dataDir"]
+  rootFileName = dic["fileRootName"]
+  nCols        = dic["nCols"]
+  isBinary     = dic["isBinary"]
+
   if comm is not None and comm.Get_size() > 1:
-    psi = array_io.read_array_distributed(comm, dataDir + "/" + fileName, nCols, isBinary)
+    fileName = dataDir + "/" + rootFileName
+    psi = read_array_distributed(comm, fileName, nCols, isBinary)
     return psi
   else:
-    psi0 = array_io.read_array(dataDir + "/" + fileName, nCols, isBinary)
-    psi  = pt.MultiVector(psi0)
+    fileName = "{}.{}.{:0{width}d}".format(rootFileName,1,0,width=1)
+    psi0 = read_array(dataDir + "/" + fileName, nCols, isBinary)
+    psi  = ptla.MultiVector(psi0)
     return psi
 
 #-----------------------------------------------------------------
@@ -79,7 +85,6 @@ def _mapLocalToGlobalIndices(dofsPerMnode, myNumRows, comm=None):
   globalInds = np.arange(myNumMeshNodes) + np.sum(meshNodesPerRank[:rank])
 
   if np.any(globalInds < 0): sys.exit("Global Indices must be positive")
-  print(rank, globalInds)
   return globalInds
 
 #-----------------------------------------------------------------
@@ -117,7 +122,7 @@ def _computeLeverageScoresBasedSMImpl(psi,
   globalInds = _mapLocalToGlobalIndices(dofsPerMnode, myNumRows, comm)
 
   # compute leverage scores
-  l_scores = pt.Vector(myNumRows)
+  l_scores = ptla.Vector(myNumRows)
   leverageScores(l_scores, psi.data())
   #print("levscores:\n",l_scores.data())
 
@@ -170,9 +175,7 @@ def _computeLeverageScoresBasedSampleMeshIndicesReadYaml(comm, yaml_in):
 # above are implementation details (note the _ prepending all names)
 # and should not be exposed outside
 #-----------------------------------------------------------------
-def findSampleMeshIndices(**args):
-  print(args.keys())
-
+def computeNodes(**args):
   if len(args) == 2 \
      and 'communicator' in args.keys() \
      and 'yamldic'      in args.keys():

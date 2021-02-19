@@ -1,4 +1,10 @@
 
+'''
+see this for why this file exists and is done this way
+https://stackoverflow.com/questions/47599162/pybind11-how-to-package-c-and-python-code-into-a-single-package?rq=1
+'''
+
+
 import scipy.linalg as _scipyla
 from ._linalg import Vector, MultiVector
 
@@ -22,8 +28,26 @@ class OnNodePySvd:
   def viewRightSingVectorsT(self):
     return self.V_.T
 
+
+class OnNodePyQR:
+  """Fallback for QR"""
+
+  def __init__(self):
+    self.Q_ = None
+    self.R_ = None
+
+  def computeThinOutOfPlace(self, A):
+    self.Q_, self.R_ = _scipyla.qr(a, mode='economic')
+
+  def viewR(self):
+    return self.R_
+
+  def viewQLocal(self):
+    return self.Q_
+
+
 try:
   from ._linalg import Svd, Tsqr, PseudoInverse
 except ImportError:
   Svd  = OnNodePySvd
-  #Tsqr = OnNodePyQr
+  Tsqr = OnNodePyQR

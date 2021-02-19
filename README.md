@@ -36,28 +36,51 @@ We provide two separate build/installation modes:
 
 - Interested in the *leverage scores-based sample mesh* functionality?
   - Look at the *sharedmemory* demo where data is read from a single ascii file
-	- the matrix is stored in a single file "matrix.txt"
+	- the matrix is stored in a single file
     - Run as:
 	 ```bash
-	 export DEMODIR=pressio-tools/demos/levscores_sample_mesh_sharedmem
+	 export DEMODIR=pressio-tools/demos/samplemesh_levscores_onnode_via_driver_script
 	 cd pressio-tools/driver-scripts
 	 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}`
 	 ```
 
-  - Look at the *distributed* demo where data is split over multiple ascii files
-    - the matrix is block-row distributed and stored in files named "mat.txt.3.i", where i=0,1,2 is the MPI rank
+  - Look at the *parallel* demo where data is split over multiple ascii files
+    - the matrix is block-row distributed and stored in files named "matrix.txt.3.i", where i=0,1,2 is the MPI rank
     - Run as:
 	  ```bash
-	  export DEMODIR=pressio-tools/demos/levscores_sample_mesh_sharedmem
+	  export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
 	  cd pressio-tools/driver-scripts
 	  mpirun -n 3 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}`
 	  ```
 
-<!-- - Interested in the *SVD* functionality? -->
-<!--   - You can look at the *distributed* demo where the target matrix is split over multiple ascii files: -->
-<!--     - the matrix is block-row distributed and stored in files named "mat.txt.3.0", "mat.txt.3.1", "mat.txt.3.2" -->
-<!-- 	- [demo](https://github.com/Pressio/pressio-tools/blob/master/demos/svd.py). -->
-<!-- 	- Run as: `cd demos; mpirun -n 4 python3 svd.py` -->
+- Interested in the *SVD* functionality?
+  - Look at the *sharedmemory* demo where data is read from a single ascii file
+	- the matrix is stored in a single file
+    - Run as:
+	 ```bash
+	 export DEMODIR=pressio-tools/demos/svd_onnode_via_driver_script
+	 cd pressio-tools/driver-scripts
+	 python3 computeSVD.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}`
+	 ```
+
+  - Look at the *parallel* demo where data is split over multiple ascii files
+    - the matrix is block-row distributed and stored in files named "matrix.txt.3.i", where i=0,1,2 is the MPI rank
+    - Run as:
+	  ```bash
+	  export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
+	  cd pressio-tools/driver-scripts
+	  mpirun -n 3 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}`
+	  ```
+
+  - Look at the *parallel* demo where the parallel SVD is called within Python
+    - the matrix is block-row distributed over 3 MPI ranks
+    - Run as:
+	  ```bash
+	  export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
+	  cd ${DEMODIR}
+	  mpirun -n 3 python3 main.py
+	  ```
+
 
 <!-- - Interested in the *QR* factorizaton? -->
 <!--   - You can look at the *distributed* case: -->

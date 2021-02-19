@@ -1,11 +1,35 @@
-ResidualBasis: 
-  file-dir: "." # [string], optional: full path to where residual basis file is. Default: working directory
-  file-root-name: "matrix.bin" # [string] file name root for the residual basis. Assumes decomposed files with the names <residual-basis-root-name>.XX.YY, where XX is the total number of ranks and YY is the rank number for a given file. 
-  format: "binary" # [string] binary or ascii: format of the residual basis file(s)
-  num-columns: 4 # [int] number of columns in the residual basis
-  num-mesh-nodes: 9 # [int] number of nodes in the mesh
-  dofs-per-mesh-node: 2 # [int] number of degrees of freedom at each mesh node 
-SampleMesh: 
-  num-sample-mesh-nodes: 4 # [int] number of desired nodes in the sample mesh
-  leverage-score-beta: 0.5 # [double] between 0.0 and 1.0: weight to blend leverage score pmf with uniform pmf over mesh nodes. Setting to 0.0 set the pmf to be uniform, while 1.0 recovers the leverage score pmf. 
-  sample-mesh-seed-nodes: "seed.txt" # [string], optional: path and filename for an ascii file which contains a list of nodes (global ids) to include in the sample mesh 
+
+ResidualBasis:
+  # [string] file name root for the residual basis.
+  # Assumes decomposed files with the names <residual-basis-root-name>.XX.YY,
+  # where XX is the total number of files and YY is the rank number for a given file.
+  # Note that the total number of files must be = to MPI size
+  file-root-name: "matrix.bin"
+
+  # [string] binary or ascii: format of the residual basis file(s)
+  format: "binary"
+
+  # [int] number of columns in the residual basis
+  num-columns: 4
+
+  # [int] number of nodes in the mesh
+  num-mesh-nodes: 9
+
+  # [int] number of degrees of freedom at each mesh node
+  dofs-per-mesh-node: 2
+
+
+SampleMesh:
+  # [int] number of desired nodes in the sample mesh
+  num-sample-mesh-nodes: 4
+
+  # [double] between 0.0 and 1.0: weight to blend leverage score
+  # pmf with uniform pmf over mesh nodes.
+  # Setting to 0.0 implies the pmf to be uniform,
+  # while 1.0 recovers the leverage score pmf.
+  # if you don't know, try 0.5
+  leverage-score-beta: 0.5
+
+  # [string], optional: path and filename for an ascii file which
+  # contains a list of nodes (global ids) to include in the sample mesh
+  sample-mesh-seed-nodes: "seed.txt"

@@ -1,9 +1,6 @@
 
 import pathlib, sys
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../../srcpy")
-
-from yaml_parser import *
+from pressiotools.io.yaml_parser import *
 
 def run():
 

@@ -1,13 +1,13 @@
 
 import sys
 import numpy as np
-import pressiotools
+import pressiotools.linalg as ptla
 
 np.set_printoptions(linewidth=140)
 
 def run(comm):
   '''
-  this demo shows how to compute the parallel QR factorization
+  this demo shows how to compute the parallel SVD
   over N ranks of a block-row distributed random matrix A.
 
   Suppose A is a 100x5 matrix such that it is
@@ -46,32 +46,30 @@ def run(comm):
   # the multivector is an abstraction that allows us
   # to easily perform all the computations behind the scenes
   # in native C++ without performance hit
-  A = pressiotools.MultiVector(myLocalRandPiece)
+  A = ptla.MultiVector(myLocalRandPiece)
 
-  # construct a Tsqr object
-  qrO = pressiotools.Tsqr()
-  # comptue the QR factorization of A
-  qrO.computeThinOutOfPlace(A)
+  # construct a SVD object
+  svdO = ptla.Svd()
+  # comptue thin svd
+  svdO.computeThin(A)
 
-  # the R factor (5x5 upper tridiagonal matrix) is replicated on all ranks
-  # R is a numpy array that you can use as you want.
-  # Note that R is owned by the qr object.
-  R = qrO.viewR()
-  print("Rank = {}, R.shape = {}".format(rank, R.shape))
+  # U is a numpy array viewing the local piece
+  U = svdO.viewLeftSingVectorsLocal()
 
-  # the Q matrix is block-row distributed in the same way A is
-  # so viewing the LocalQ here means that you only access
-  # the rows of Q that belong to this rank
-  # Q is a numpy array that you can use as needed.
-  # Note that Q is owned by the qr object.
-  Q = qrO.viewQLocal()
-  print("Rank = {}, Q.shape = {}".format(rank, Q.shape))
+  # S contains the sing values, replicated on each rank
+  S = svdO.viewSingValues()
 
-  # note: the above methods are called "view" because NO copy is made
+  # VT contains the transpose of the right-vectors, replicated on each rank
+  VT = svdO.viewRightSingVectorsT()
+
+  print("Rank = {}, U.shape = {}, S.shape = {}, VT.shape = {}".format(
+    rank, U.shape, S.shape, VT.shape))
+
+  if rank==0: print("singular values = {}".format(S))
 
 if __name__ == '__main__':
   '''
-  run with:  mpirun -np 4 python3 qr.py
+  run with:  mpirun -np 4 python3 svd.py
   '''
   from mpi4py import MPI
   comm = MPI.COMM_WORLD

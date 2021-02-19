@@ -13,13 +13,8 @@
 #include "pinv.hpp"
 #endif
 
-#define PT_STRINGIFY(x) #x
-#define PT_MACRO_STRINGIFY(x) PT_STRINGIFY(x)
-
 PYBIND11_MODULE(MODNAME, mParent)
 {
-  mParent.attr("__version__") = PT_MACRO_STRINGIFY(VERSION_IN);
-
   // bind vector
   using v_t = pressiotools::Vector;
   pybind11::class_<v_t> vec(mParent, "Vector");

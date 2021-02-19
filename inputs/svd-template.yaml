@@ -1,0 +1,24 @@
+
+SVD:
+  # [string] file name root for the residual basis.
+  # Assumes decomposed files with the names <residual-basis-root-name>.XX.YY,
+  # where XX is the total number of files and YY is the rank number for a given file.
+  # Note that the total number of files must be = to MPI size
+  file-root-name: "matrix.bin"
+
+  # [string] binary or ascii: format of the residual basis file(s)
+  format: "binary"
+
+  # [int] number of columns in the residual basis
+  num-columns: 4
+
+  # node with info on how to handle the left-singular vectors
+  leftSingularVectors:
+    # filerootname follows same formatting as file-root-name above
+    file-root-name: "lsv.txt"
+
+    # format: ascii or binary
+    write-format: "ascii"
+
+    # how many vectors to write
+    how-many: 2

@@ -19,8 +19,8 @@ def run(comm):
 
   myNumRows = 5
   myStartRow = rank*myNumRows
-  mat = pt.MultiVector(mat0[myStartRow:myStartRow+myNumRows, :])
-  vec = pt.Vector(vec0[myStartRow:myStartRow+myNumRows])
+  mat = ptla.MultiVector(mat0[myStartRow:myStartRow+myNumRows, :])
+  vec = ptla.Vector(vec0[myStartRow:myStartRow+myNumRows])
 
   if rank==0:
     print(mat0)

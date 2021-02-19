@@ -1,7 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-import pressiotools as pt
+import pressiotools.linalg as ptla
 
 def vec_constr(comm):
   rank = comm.Get_rank()
@@ -11,7 +11,7 @@ def vec_constr(comm):
   if (rank==2): nrows = 4
   if (rank==3): nrows = 6
 
-  A = pt.Vector(nrows)
+  A = ptla.Vector(nrows)
   if (rank==0): assert(A.extentLocal()==5)
   if (rank==1): assert(A.extentLocal()==6)
   if (rank==2): assert(A.extentLocal()==4)
@@ -30,7 +30,7 @@ def vec_extent(comm):
   if (rank==3): nrows = 6
 
   d = np.zeros(nrows)
-  A = pt.Vector(d)
+  A = ptla.Vector(d)
 
   if (rank==0): assert(A.extentLocal()==5)
   if (rank==1): assert(A.extentLocal()==6)
@@ -46,7 +46,7 @@ def vec_extent_global(comm):
   if (rank==3): nrows = 6
 
   d = np.zeros(nrows)
-  A = pt.Vector(d)
+  A = ptla.Vector(d)
   assert(A.extentGlobal()==21)
 
 
@@ -59,7 +59,7 @@ def vec_content(comm):
   if (rank==2): d *= 3.
   if (rank==3): d *= 4.
 
-  A = pt.Vector(d)
+  A = ptla.Vector(d)
   nativeView = A.data()
 
   if (rank==0): gold = np.ones(5)
@@ -77,7 +77,7 @@ def vec_content1(comm):
   if (rank==2): d *= 3.
   if (rank==3): d *= 4.
 
-  A = pt.Vector(d)
+  A = ptla.Vector(d)
   nativeView = A.data()
 
   if (rank==0): gold = np.ones(5)

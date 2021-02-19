@@ -30,10 +30,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 #=====================================================================
 set(modulename _linalg)
-add_subdirectory          (${CMAKE_CURRENT_SOURCE_DIR}/pybind11)
-pybind11_add_module       (${modulename} src/main_binder.cc)
-target_compile_definitions(${modulename} PRIVATE VERSION_IN=${VERSION_INFO})
-target_compile_definitions(${modulename} PRIVATE MODNAME=${modulename})
+add_subdirectory            (${CMAKE_CURRENT_SOURCE_DIR}/pybind11)
+pybind11_add_module         (${modulename} src/main_binder.cc)
+target_compile_definitions  (${modulename} PRIVATE MODNAME=${modulename})
+
 if (NOT ${TRILINOS_ROOT} STREQUAL "")
   include(tplTrilinos)
   target_include_directories(${modulename} PRIVATE ${TRILINOS_ROOT}/include)

@@ -2,7 +2,7 @@
 import argparse, sys, importlib
 import importlib
 from pressiotools.io.yaml_parser import yaml_read
-from pressiotools.samplemesh.withLeverageScores import findSampleMeshIndices
+from pressiotools.samplemesh.withLeverageScores import computeNodes
 
 #--------------------------
 if __name__ == '__main__':
@@ -52,4 +52,4 @@ If nothing is passed, we use as output the directory where data is loaded from."
   comm = MPI.COMM_WORLD if mpi4pyfound else None
 
   # compute
-  findSampleMeshIndices(communicator=comm, yamldic=yaml_in)
+  computeNodes(communicator=comm, yamldic=yaml_in)
