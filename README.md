@@ -13,7 +13,7 @@
 
 - QR factorization of a shared- or distributed-memory (tall-skinny) matrix
 
-`pressio-tools` is self-contained but mainly developed as an auxiliary tool to the [pressio C++ library](https://pressio.github.io/pressio/html/index.html) and its [Python bindings library](https://pressio.github.io/pressio4py/html/index.html).
+`pressio-tools` is self-contained but mainly developed as an auxiliary tool to [pressio](https://pressio.github.io/).
 
 <!-- # When to use pressio-tools? -->
 <!-- *`pressio-tools` is mainly intended to operate on large data distributed on large-scale machines, but we also support sharemem scenarios.* -->
