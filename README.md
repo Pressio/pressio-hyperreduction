@@ -25,11 +25,11 @@
 We provide two separate build/installation modes:
 
 - to work *only* on shared-memory data:
-  * basic mode requiring you to only have Python and a C++ compiler, and intended to get you started quickly
+  * basic mode requiring only Python and a C++ compiler; intended to get you started quickly
   * see the [wiki page](https://github.com/Pressio/pressio-tools/wiki/Sharedmemory-build:-requirements-and-installation).
 
 - to work on potentially distributed-memory data:
-  * more *advanced* mode relying on MPI and Trilinos as a backend to operate on potentially distributed large-scale data
+  * more *advanced* mode relying on MPI and Trilinos to operate on potentially distributed large-scale data
   * see the [wiki page](https://github.com/Pressio/pressio-tools/wiki/MPI-build:-requirements-and-installation).
 
 # Usage
