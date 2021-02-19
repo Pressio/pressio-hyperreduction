@@ -34,7 +34,7 @@ We provide two separate build/installation modes:
 
 # Usage
 
-- Interested in the *leverage scores-based sample mesh* functionality?
+### Interested in the *leverage scores-based sample mesh* functionality?
   - Look at the *sharedmemory* demo where data is read from a single ascii file
 	- the matrix is stored in a single file
     - Run as:
@@ -45,7 +45,7 @@ We provide two separate build/installation modes:
 	```
 
   - Look at the *parallel* demo where data is split over multiple ascii files
-    - the matrix is block-row distributed and stored in files named "matrix.txt.3.i", where i=0,1,2 is the MPI rank
+    - the matrix is block-row distributed, stored as "matrix.txt.3.i", where i=0,1,2 is the MPI rank
     - Run as:
 	```bash
 	export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
@@ -53,7 +53,7 @@ We provide two separate build/installation modes:
 	mpirun -n 3 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
 
-- Interested in the *SVD* functionality?
+### Interested in the *SVD* functionality?
   - Look at the *sharedmemory* demo where data is read from a single ascii file
 	- the matrix is stored in a single file
     - Run as:
@@ -64,7 +64,7 @@ We provide two separate build/installation modes:
 	```
 
   - Look at the *parallel* demo where data is split over multiple ascii files
-    - the matrix is block-row distributed and stored in files named "matrix.txt.3.i", where i=0,1,2 is the MPI rank
+    - the matrix is block-row distributed, stored as "matrix.txt.3.i", where i=0,1,2 is the MPI rank
     - Run as:
 	```bash
 	export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
