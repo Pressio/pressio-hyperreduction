@@ -3,7 +3,7 @@ import numpy as np
 import pathlib, sys
 import pressiotools as pt
 import array_io
-from levscores_functions import *
+from levscores import *
 
 #-----------------------------------------------------------------
 def _processYamlDictionary(yamlDic):
@@ -170,7 +170,7 @@ def _computeLeverageScoresBasedSampleMeshIndicesReadYaml(comm, yaml_in):
 # above are implementation details (note the _ prepending all names)
 # and should not be exposed outside
 #-----------------------------------------------------------------
-def computeSampleMeshIndicesUsingLevScores(**args):
+def findSampleMeshIndices(**args):
   print(args.keys())
 
   if len(args) == 2 \

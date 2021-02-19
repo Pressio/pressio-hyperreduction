@@ -18,7 +18,7 @@ topdir = os.path.abspath(os.path.dirname(__file__))
 # Metadata
 # ----------------------------------------------
 def myname():
-  return "pressio-tools"
+  return "pressiotools"
 
 def myversion():
   return "0.6.1rc1"
@@ -174,6 +174,11 @@ class install(_install):
     global serialOnly, trilinosBaseDir
     serialOnly      = self.single_node
     trilinosBaseDir = self.trilinos_basedir
+    # print("install-lib", self.install_lib)
+    # print("install-purelib", self.install_purelib)
+    # self.install_lib += "/pressiotools"
+    # self.install_purelib = self.install_lib
+    # print("install-purelib", self.install_purelib)
     _install.run(self)
 
 # ----------------------------------------------
@@ -182,14 +187,16 @@ class install(_install):
 # A CMakeExtension needs a sourcedir instead of a file list.
 class CMakeExtension(Extension):
   def __init__(self, name, sourcedir=""):
+    print("self.name ", name)
     Extension.__init__(self, name, sources=[])
     self.sourcedir = os.path.abspath(sourcedir)
+
 
 class CMakeBuild(build_ext):
   def build_extension(self, ext):
     extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-
     if not extdir.endswith(os.path.sep): extdir += os.path.sep
+    print("self.extdir ",extdir)
 
     # create build directory
     if not os.path.exists(self.build_temp): os.makedirs(self.build_temp)
@@ -254,10 +261,9 @@ class CMakeBuild(build_ext):
         print(msg)
 
       # build/install pressio-tools
-      cc = os.environ.get("MPI_BASE_DIR")+"/bin/mpicc"
+      #cc = os.environ.get("MPI_BASE_DIR")+"/bin/mpicc"
       cxx = os.environ.get("MPI_BASE_DIR")+"/bin/mpicxx"
       cmake_args = [
-        "-DCMAKE_C_COMPILER={}".format(cc),
         "-DCMAKE_CXX_COMPILER={}".format(cxx),
         "-DCMAKE_VERBOSE_MAKEFILE={}".format("ON"),
         "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
@@ -286,19 +292,19 @@ def run_setup():
     version=myversion(),
     author="F.Rizzi, P.Blonigan, E.Parish, J.Tencer",
     author_email="TBD",
-    description="pressio-tools",
+    description="Tools for pressio",
     long_description=description(),
-    #
+
     project_urls={
       'Source': 'https://github.com/Pressio/pressio-tools'
     },
-    #
-    ext_modules=[CMakeExtension("pressio-tools")],
+
+    ext_modules=[CMakeExtension("pressiotools._linalg")],
     cmdclass={"build_ext": CMakeBuild,
               "install"  : install},
     install_requires=["numpy", "scipy", "pyyaml"],
     zip_safe=False,
-    #
+
     python_requires='>=3',
     classifiers=[
       "License :: OSI Approved :: BSD License",
@@ -312,7 +318,14 @@ def run_setup():
       "Topic :: Software Development :: Libraries",
       "Development Status :: 4 - Beta"
     ],
-    keywords=["model reduction", "scientific computing", "dense linear algebra", "HPC"],
+
+    keywords=["model reduction",
+              "scientific computing",
+              "dense linear algebra",
+              "parallel computing",
+              "hyper-reduction",
+              "HPC"],
+    packages=['pressiotools', 'pressiotools.io', 'pressiotools.samplemesh'],
   )
 
 if __name__ == '__main__':

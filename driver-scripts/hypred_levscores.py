@@ -1,13 +1,8 @@
 
-import argparse
-import pathlib, sys
+import argparse, sys, importlib
 import importlib
-
-# need to access pure python modules of pressio-tools
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../srcpy")
-from yaml_parser import yaml_read
-from samplemesh_with_levscores import computeSampleMeshIndicesUsingLevScores
+from pressiotools.io.yaml_parser import yaml_read
+from pressiotools.samplemesh.withLeverageScores import findSampleMeshIndices
 
 #--------------------------
 if __name__ == '__main__':
@@ -57,5 +52,4 @@ If nothing is passed, we use as output the directory where data is loaded from."
   comm = MPI.COMM_WORLD if mpi4pyfound else None
 
   # compute
-  computeSampleMeshIndicesUsingLevScores(communicator=comm,
-                                         yamldic=yaml_in)
+  findSampleMeshIndices(communicator=comm, yamldic=yaml_in)

@@ -1,8 +1,9 @@
 
+import sys
 import numpy as np
-import pathlib, sys
-import pressiotools as pt
-import array_io
+from pressiotools.io.array_read import *
+from pressiotools.io.array_write import *
+from pressiotools import linalg as ptla
 
 #-----------------------------------------------------------------
 def _processYamlDictionary(yamlDic):
@@ -34,16 +35,16 @@ def _readData(dic, comm=None):
   isBinary     = dic["isBinary"]
   if comm is not None and comm.Get_size() > 1:
     fileName = dataDir + "/" + rootFileName
-    psi = array_io.read_array_distributed(comm, fileName, nCols, isBinary)
+    psi = read_array_distributed(comm, fileName, nCols, isBinary)
     return psi
   else:
     fileName = "{}.{}.{:0{width}d}".format(rootFileName,1,0,width=1)
-    psi0 = array_io.read_array(dataDir + "/" + fileName, nCols, isBinary)
-    psi  = pt.MultiVector(psi0)
+    psi0 = read_array(dataDir + "/" + fileName, nCols, isBinary)
+    psi  = ptla.MultiVector(psi0)
     return psi
 
 #-----------------------------------------------------------------
-def _computeSvdReadYaml(comm, yaml_in):
+def _computeSvdYamlInput(comm, yaml_in):
   nullComm = True if comm is None else False
   rank     = 0 if nullComm else comm.Get_rank()
   nRanks   = 1 if nullComm else comm.Get_size()
@@ -62,35 +63,20 @@ def _computeSvdReadYaml(comm, yaml_in):
 
   # read data matrix
   A = _readData(dic, comm)
-  #print(A.data())
 
-  # compute
-  if nullComm or nRanks==1:
-    import scipy.linalg.lapack as la
-    U,S,V = np.linalg.svd(A.data(), full_matrices=False)
-    #np.savetxt(outDir+"/"+svecWriteFileName".txt", mySampleMeshNodes, fmt="%d")
+  svdObject = ptla.Svd()
+  svdObject.computeThin(A)
+  U  = svdObject.viewLeftSingVectorsLocal()
+  S  = svdObject.viewSingValues()
+  VT = svdObject.viewRightSingVectorsT()
+  if rank == 0:
     print("Computation completed, outputting results")
 
-    Ufile = dic['outDir']+"/"+svecWriteFileName+".txt"+str(0)
-    np.savetxt(Ufile, U[:, :svecNumToKeep], fmt="%.15f")
-
-    Sfile = dic['outDir']+"/singularValues.txt"
-    if rank == 0: np.savetxt(Sfile, S, fmt="%.15f")
-
-  else:
-    svdObject = pt.svd()
-    svdObject.computeThin(A)
-    U  = svdObject.viewLeftSingVectorsLocal()
-    S  = svdObject.viewSingValues()
-    VT = svdObject.viewRightSingVectorsT()
-
-    if rank == 0: print("Computation completed, outputting results")
-
-    Ufile = dic['outDir']+"/"+svecWriteFileName+".txt"+str(rank)
-    np.savetxt(Ufile, U[:, :svecNumToKeep], fmt="%.15f")
-
-    Sfile = dic['outDir']+"/singularValues.txt"
-    if rank == 0: np.savetxt(Sfile, S, fmt="%.15f")
+  Ufile = dic['outDir']+"/"+svecWriteFileName+".txt"+str(rank)
+  np.savetxt(Ufile, U[:, :svecNumToKeep], fmt="%.15f")
+  Sfile = dic['outDir']+"/singularValues.txt"
+  if rank == 0:
+    np.savetxt(Sfile, S, fmt="%.15f")
 
   if rank == 0: print("All done!")
 
@@ -103,7 +89,7 @@ def computeSvd(**args):
   if len(args) == 2 \
      and 'communicator' in args.keys() \
      and 'yamldic'      in args.keys():
-    _computeSvdReadYaml(args['communicator'], args['yamldic'])
+    _computeSvdYamlInput(args['communicator'], args['yamldic'])
 
   else:
     sys.exit("svd currently only supported via yaml file")

@@ -1,12 +1,8 @@
 
-import math
 import numpy as np
-import pathlib, sys
-import pressiotools as pt
-file_path = pathlib.Path(__file__).parent.absolute()
-# this is needed to access the levscores python code
-sys.path.append(str(file_path) + "/../srcpy")
-from samplemesh_with_levscores import *
+import sys
+import pressiotools.linalg as ptla
+from pressiotools.samplemesh.withLeverageScores import findSampleMeshIndices
 
 np.set_printoptions(linewidth=140,precision=14)
 tol = 1e-14
@@ -14,10 +10,10 @@ tol = 1e-14
 def run(psi, comm):
   rank = comm.Get_rank()
   dofsPerNode = 2
-  indices, pmf = computeSampleMeshIndicesUsingLevScores(matrix=psi,
-                                                        numSamples=5,
-                                                        dofsPerMeshNode=dofsPerNode,
-                                                        communicator=comm)
+  indices, pmf = findSampleMeshIndices(matrix=psi,
+                                       numSamples=5,
+                                       dofsPerMeshNode=dofsPerNode,
+                                       communicator=comm)
   print(indices)
   if rank == 0:
     gold = [2]

@@ -1,7 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-import pressiotools as pt
+import pressiotools.linalg as ptla
 
 np.set_printoptions(linewidth=140)
 
@@ -13,8 +13,8 @@ def tsqr_run(comm):
   Q1, R1 = np.linalg.qr(A)
   print(Q1)
 
-  A1 = pt.MultiVector(A)
-  qrO = pt.Tsqr()
+  A1 = ptla.MultiVector(A)
+  qrO = ptla.Tsqr()
   qrO.computeThinOutOfPlace(A1)
   R = qrO.viewR()
   Q = qrO.viewQLocal()
@@ -37,8 +37,8 @@ def tsqr_fancy_indexing(comm):
   Q1, R1 = np.linalg.qr(Asub)
   print(Q1)
 
-  A1 = pt.MultiVector(Asub)
-  qrO = pt.Tsqr()
+  A1 = ptla.MultiVector(Asub)
+  qrO = ptla.Tsqr()
   qrO.computeThinOutOfPlace(A1)
   R = qrO.viewR()
   Q = qrO.viewQLocal()

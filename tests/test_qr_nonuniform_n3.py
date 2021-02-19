@@ -1,7 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-import pressiotools as pt
+import pressiotools.linalg as ptla
 
 np.set_printoptions(linewidth=140)
 
@@ -22,9 +22,9 @@ def tsqr_run(comm):
   elif rank==2:
     A1 = A[20:30, :]
 
-  A2 = pt.MultiVector(A1)
+  A2 = ptla.MultiVector(A1)
 
-  qrO = pt.Tsqr()
+  qrO = ptla.Tsqr()
   qrO.computeThinOutOfPlace(A2)
   R = qrO.viewR()
   Q = qrO.viewQLocal()

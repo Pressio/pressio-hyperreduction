@@ -1,8 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-
-import pressiotools as pt
+import pressiotools.linalg as ptla
 
 def mv_extent(comm):
   rank = comm.Get_rank()
@@ -12,7 +11,7 @@ def mv_extent(comm):
   if (rank==3): nrows = 6
 
   d = np.zeros((nrows,3), order='F')
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
 
   if (rank==0): assert(A.extentLocal(0)==5)
   if (rank==1): assert(A.extentLocal(0)==6)
@@ -29,7 +28,7 @@ def mv_extent_global(comm):
   if (rank==3): nrows = 6
 
   d = np.zeros((nrows,3), order='F')
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
   assert(A.extentGlobal(0)==21)
   assert(A.extentGlobal(1)==3)
 
@@ -42,7 +41,7 @@ def mv_content(comm):
   if (rank==2): d *= 3.
   if (rank==3): d *= 4.
 
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
   nativeView = A.data()
 
   if (rank==0): gold = np.ones((5,3))
@@ -59,7 +58,7 @@ def mv_content1(comm):
   if (rank==2): d *= 3.
   if (rank==3): d *= 4.
 
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
   nativeView = A.data()
 
   if (rank==0): gold = np.ones((5,3))

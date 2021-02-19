@@ -21,4 +21,4 @@ cd ..
 python test_levscores.py
 
 # actual code for doing sample mesh
-python test_samplemesh_from_levscores.py
+python test_sm_levscores.py

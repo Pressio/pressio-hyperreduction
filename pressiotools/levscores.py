@@ -1,8 +1,7 @@
 
 import numpy as np
 import pathlib, sys
-import pressiotools as pt
-import array_io
+import pressiotools.linalg as ptla
 
 #-----------------------------------------------------------------
 def leverageScores(ls, A):
@@ -31,7 +30,7 @@ def computePmf(l_scores, dofsPerMnode, pmf_blend=0.5, comm=None):
 
   # sum up probability mass for each mesh node
   myNumMeshNodes = int(mylscoresExt/dofsPerMnode)
-  pmf_meshDofs   = pt.Vector(myNumMeshNodes)
+  pmf_meshDofs   = ptla.Vector(myNumMeshNodes)
   pmf_meshDofs.data()[:] = np.zeros(myNumMeshNodes)
 
   # sum up probabilities for each mesh DoF

@@ -2,11 +2,8 @@
 import math
 import numpy as np
 import pathlib, sys
-import pressiotools as pt
-file_path = pathlib.Path(__file__).parent.absolute()#
-# this is needed to access the levscores python code
-sys.path.append(str(file_path) + "/../srcpy")
-from levscores_functions import *
+from pressiotools import linalg as ptla
+from pressiotools.levscores import *
 
 np.set_printoptions(linewidth=140,precision=14)
 tol = 1e-14
@@ -14,7 +11,7 @@ tol = 1e-14
 def check_levscores(psi, comm):
   rank = comm.Get_rank()
 
-  l_scores = pt.Vector(myNumRows)
+  l_scores = ptla.Vector(myNumRows)
   leverageScores(l_scores, psi.data())
   print(rank,l_scores.data())
 
@@ -56,7 +53,7 @@ def check_levscores(psi, comm):
 def check_pmf(psi, comm):
   rank = comm.Get_rank()
 
-  l_scores = pt.Vector(psi.extentLocal(0))
+  l_scores = ptla.Vector(psi.extentLocal(0))
   leverageScores(l_scores, psi.data())
 
   l_scores_pmf,_ = computePmf(l_scores, 2, 0.5, comm)
@@ -98,7 +95,7 @@ if __name__ == '__main__':
 
   myNumRows = 8
   myStartRow = rank*myNumRows
-  psi = pt.MultiVector(psi0[myStartRow:myStartRow+myNumRows, :])
+  psi = ptla.MultiVector(psi0[myStartRow:myStartRow+myNumRows, :])
 
   check_levscores(psi, comm)
   check_pmf(psi, comm)

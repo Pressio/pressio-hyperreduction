@@ -1,21 +1,14 @@
 
-import pathlib, sys
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../../srcpy")
-
 import numpy as np
-from mpi4py import MPI
-import pressiotools as pt
-from array_io import *
+from pressiotools import linalg as ptla
+from pressiotools.io.array_read import *
+from pressiotools.io.array_write import *
 
 np.set_printoptions(linewidth=140,precision=14)
 tol = 1e-14
 
-def run():
-  comm = MPI.COMM_WORLD
+def run(comm):
   rank = comm.Get_rank()
-  assert(comm.Get_size() == 3)
-
   np.random.seed(223)
 
   # random distributed matrix by selecting
@@ -52,6 +45,8 @@ def run():
   vec_in = read_array_distributed(comm, "vector.bin",1)
   assert(np.all(np.abs(vec_in.data() - vec.data()) < tol))
 
-
 if __name__ == '__main__':
-  run()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  assert(comm.Get_size() == 3)
+  run(comm)

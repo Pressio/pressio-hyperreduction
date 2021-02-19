@@ -16,7 +16,7 @@
 #define PT_STRINGIFY(x) #x
 #define PT_MACRO_STRINGIFY(x) PT_STRINGIFY(x)
 
-PYBIND11_MODULE(pressiotools, mParent)
+PYBIND11_MODULE(MODNAME, mParent)
 {
   mParent.attr("__version__") = PT_MACRO_STRINGIFY(VERSION_IN);
 
@@ -59,7 +59,7 @@ PYBIND11_MODULE(pressiotools, mParent)
 
   // bind svd
   using svd_t = pressiotools::Svd;
-  pybind11::class_<svd_t> svd(mParent, "svd");
+  pybind11::class_<svd_t> svd(mParent, "Svd");
   svd.def(pybind11::init());
   svd.def("computeThin", &svd_t::computeThin);
   svd.def("viewSingValues",
@@ -71,7 +71,7 @@ PYBIND11_MODULE(pressiotools, mParent)
 
   // bind pinv
   using pinv_t = pressiotools::Pinv;
-  pybind11::class_<pinv_t> pinv(mParent, "pinv");
+  pybind11::class_<pinv_t> pinv(mParent, "PseudoInverse");
   pinv.def(pybind11::init());
   pinv.def("compute", &pinv_t::compute);
   pinv.def("viewTransposeLocal",

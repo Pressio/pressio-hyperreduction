@@ -1,7 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-import pressiotools as pt
+import pressiotools.linalg as ptla
 import scipy.linalg as la
 
 np.set_printoptions(linewidth=140)
@@ -19,11 +19,11 @@ def pinv_run(comm):
 
   # create distributed A
   myStartRow = rank*5
-  A1 = pt.MultiVector(A[myStartRow:myStartRow+5, :])
-  piO = pt.pinv()
+  A1 = ptla.MultiVector(A[myStartRow:myStartRow+5, :])
+  piO = ptla.PseudoInverse()
   piO.compute(A1)
   # view the local part of A^*T
-  # remember that pressiotools.pinv stores A^*T NOT A^*
+  # remember that pressiotools.PseudoInverse stores A^*T NOT A^*
   AstarT = piO.viewTransposeLocal()
   print("rank", rank, AstarT)
 
@@ -50,10 +50,10 @@ def pinv_apply(comm):
   # do same using our code
   # create distributed A
   myStartRow = rank*5
-  A1 = pt.MultiVector(A[myStartRow:myStartRow+5, :])
-  piO = pt.pinv()
+  A1 = ptla.MultiVector(A[myStartRow:myStartRow+5, :])
+  piO = ptla.PseudoInverse()
   piO.compute(A1)
-  d1 = pt.Vector(np.ones(5))
+  d1 = ptla.Vector(np.ones(5))
   c1 = piO.apply(d1)
   print(c1)
 

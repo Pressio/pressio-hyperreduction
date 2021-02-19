@@ -2,17 +2,14 @@
 import math
 import numpy as np
 import pathlib, sys
-import pressiotools as pt
-file_path = pathlib.Path(__file__).parent.absolute()#
-# this is needed to access the levscores python code
-sys.path.append(str(file_path) + "/../srcpy")
-from levscores_functions import *
+from pressiotools import linalg as ptla
+from pressiotools.levscores import *
 
 np.set_printoptions(linewidth=140,precision=14)
 tol = 1e-14
 
 def check_levscores(psi):
-  l_scores = pt.Vector(psi.extentLocal(0))
+  l_scores = ptla.Vector(psi.extentLocal(0))
   leverageScores(l_scores, psi.data())
   print(l_scores.data())
 
@@ -48,7 +45,7 @@ def check_levscores(psi):
   assert( math.isclose(r, 28.863887276965883) )
 
 def check_pmf(psi):
-  l_scores = pt.Vector(psi.extent(0))
+  l_scores = ptla.Vector(psi.extent(0))
   leverageScores(l_scores, psi.data())
   l_scores_pmf,_ = computePmf(l_scores,2)
   print(l_scores_pmf.data())
@@ -73,7 +70,7 @@ def check_pmf(psi):
 if __name__ == '__main__':
   np.random.seed(312367)
   psi0 = np.asfortranarray(np.random.rand(24,4))
-  psi = pt.MultiVector(psi0)
+  psi = ptla.MultiVector(psi0)
   print(psi0)
   print("---------\n")
 

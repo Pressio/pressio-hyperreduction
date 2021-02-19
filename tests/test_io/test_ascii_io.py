@@ -1,12 +1,8 @@
 
-import pathlib, sys
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../../srcpy")
-
 import numpy as np
-import pressiotools as pt
-from array_io import *
-import scipy.linalg as la
+from pressiotools import linalg as ptla
+from pressiotools.io.array_read import *
+from pressiotools.io.array_write import *
 
 np.set_printoptions(linewidth=140,precision=14)
 tol = 1e-14

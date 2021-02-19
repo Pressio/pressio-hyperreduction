@@ -1,7 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-import pressiotools as pt
+import pressiotools.linalg as ptla
 import scipy.linalg as la
 
 np.set_printoptions(linewidth=140)
@@ -14,8 +14,8 @@ def pinv_run(comm):
   B = la.pinv(A)
   print(B.T)
 
-  A1 = pt.MultiVector(A)
-  piO = pt.pinv()
+  A1 = ptla.MultiVector(A)
+  piO = ptla.PseudoInverse()
   piO.compute(A1)
   AstarT = piO.viewTransposeLocal()
   print(AstarT)
@@ -38,10 +38,10 @@ def pinv_apply(comm):
   print(c)
 
   # do same using our code
-  A1 = pt.MultiVector(A)
-  piO = pt.pinv()
+  A1 = ptla.MultiVector(A)
+  piO = ptla.PseudoInverse()
   piO.compute(A1)
-  d1 = pt.Vector(d0)
+  d1 = ptla.Vector(d0)
   c1 = piO.apply(d1)
   print(c1)
 

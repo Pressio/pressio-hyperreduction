@@ -1,19 +1,13 @@
 
-import argparse
-import pathlib, sys
-import importlib
-
-# need to access pure python modules of pressio-tools
-file_path = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(file_path) + "/../srcpy")
-from yaml_parser import yaml_read
-from do_svd import computeSvd
+import argparse, sys, importlib
+from pressiotools.io.yaml_parser import yaml_read
+from pressiotools.computeSvd import computeSvd
 
 #--------------------------
 if __name__ == '__main__':
 #--------------------------
   # check if mpi4py modele is present, if so import it
-  mpi4pyspec = importlib.util.find_spec("mpi4py")
+  mpi4pyspec  = importlib.util.find_spec("mpi4py")
   mpi4pyfound = mpi4pyspec is not None
   if mpi4pyfound:
     # mpi4py initializes mpi when the module is imported so

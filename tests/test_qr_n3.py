@@ -1,7 +1,7 @@
 
 import pathlib, sys
 import numpy as np
-import pressiotools as pt
+import pressiotools.linalg as ptla
 
 np.set_printoptions(linewidth=140)
 
@@ -16,8 +16,8 @@ def tsqr_run(comm):
 
   # create distributed A
   myStartRow = rank*5
-  A1 = pt.MultiVector(A[myStartRow:myStartRow+5, :])
-  qrO = pt.Tsqr()
+  A1  = ptla.MultiVector(A[myStartRow:myStartRow+5, :])
+  qrO = ptla.Tsqr()
   qrO.computeThinOutOfPlace(A1)
   R = qrO.viewR()
   Q = qrO.viewQLocal()

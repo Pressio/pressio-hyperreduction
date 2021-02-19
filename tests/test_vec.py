@@ -1,5 +1,4 @@
 
-import pathlib, sys
 import numpy as np
 import pressiotools as pt
 

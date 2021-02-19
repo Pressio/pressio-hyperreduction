@@ -1,11 +1,11 @@
 
 import numpy as np
-import pressiotools as pt
+from pressiotools import linalg as ptla
 
 def mv_extent():
   nrows = 5
   d = np.zeros((nrows,3), order='F')
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
   assert(A.extent(0)==5)
   assert(A.extentLocal(0)==5)
   assert(A.extentGlobal(0)==5)
@@ -16,7 +16,7 @@ def mv_extent():
 def mv_content():
   d = np.ones((5,3), order='F')
   d *= 1.
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
   nativeView = A.data()
   gold = np.ones((5,3))
   assert(np.allclose(gold, nativeView))
@@ -24,7 +24,7 @@ def mv_content():
 def mv_content1():
   d = np.ones((5,3), order='F')
   d *= 1.
-  A = pt.MultiVector(d)
+  A = ptla.MultiVector(d)
   nativeView = A.data()
   gold = np.ones((5,3))
   assert(np.allclose(gold, nativeView))

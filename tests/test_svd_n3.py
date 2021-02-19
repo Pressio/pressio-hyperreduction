@@ -1,8 +1,6 @@
 
-import pathlib, sys
 import numpy as np
-import pressiotools as pt
-import scipy.linalg.lapack as la
+from pressiotools import linalg as ptla
 
 np.set_printoptions(linewidth=140)
 
@@ -21,8 +19,8 @@ def svd_run(comm):
 
   # create distributed A
   myStartRow = rank*5
-  A1 = pt.MultiVector(A[myStartRow:myStartRow+5, :])
-  svdO = pt.svd()
+  A1   = ptla.MultiVector(A[myStartRow:myStartRow+5, :])
+  svdO = ptla.Svd()
   svdO.computeThin(A1)
   U1 = svdO.viewLeftSingVectorsLocal()
   S1 = svdO.viewSingValues()
