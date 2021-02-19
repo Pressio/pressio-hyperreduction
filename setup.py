@@ -94,14 +94,14 @@ def description():
 # Trilinos build for mpi
 # ----------------------------------------------
 def trilinos_for_mpi_build(buildDir):
-  trilTarName = "trilinos-release-13-0-1.tar.gz"
+  trilTarName      = "trilinos-release-13-0-1.tar.gz"
   trilUnpackedName = "Trilinos-trilinos-release-13-0-1"
-  trilUrl = "https://github.com/trilinos/Trilinos/archive/"+trilTarName
+  trilUrl          = "https://github.com/trilinos/Trilinos/archive/"+trilTarName
 
   cwd = os.getcwd()
 
   # create subdirs for trilinos
-  trilinosSubDir = cwd + "/"+self.build_temp+"/../trilinos"
+  trilinosSubDir = cwd + "/"+buildDir+"/../trilinos"
   if not os.path.exists(trilinosSubDir): os.makedirs(trilinosSubDir)
 
   trilTarPath = trilinosSubDir+"/"+trilTarName
@@ -152,7 +152,8 @@ def trilinos_for_mpi_build(buildDir):
     )
 
   # set env var
-  os.environ["TRILINOS_ROOT"] = trilInstallDir
+  return trilInstallDir
+  #os.environ["TRILINOS_ROOT"] = trilInstallDir
 
 # ----------------------------------------------
 # overload install command
@@ -246,14 +247,15 @@ class CMakeBuild(build_ext):
         raise RuntimeError(msg)
 
       # check if trilinos_basedir is present, if not attemp build
+      trilinosRoot=""
       if trilinosBaseDir == "void":
         msg = "You did not specify --trilinos-basedir, so attempting to build Trilinos on my own"
         print(msg)
-        trilinos_for_mpi_build(self.build_temp)
-
+        trilinosRoot = trilinos_for_mpi_build(self.build_temp)
       else:
         msg = "Found trilinos base dir={}".format(trilinosBaseDir)
         print(msg)
+        trilinosRoot = trilinosBaseDir
 
       # build/install pressio-tools
       #cc = os.environ.get("MPI_BASE_DIR")+"/bin/mpicc"
@@ -264,7 +266,7 @@ class CMakeBuild(build_ext):
         "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
         "-DPYTHON_EXECUTABLE={}".format(sys.executable),
         "-DCMAKE_BUILD_TYPE={}".format(buildMode),
-        "-DTRILINOS_ROOT={}".format(trilinosBaseDir),
+        "-DTRILINOS_ROOT={}".format(trilinosRoot),
       ]
       build_args = []
 
