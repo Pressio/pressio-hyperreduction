@@ -28,36 +28,36 @@ def run(comm):
 
   # serial read
   if rank==0:
-    mat0_gold = read_array("matrix.txt.gold",numCols,isBinary=False)
+    mat0_gold = read_array("data_ascii/matrix.txt.gold",numCols,isBinary=False)
     assert(np.all(np.abs(mat0_gold - mat0) < tol))
 
-    vec0_gold = read_array("vector.txt.gold",1,isBinary=False)
+    vec0_gold = read_array("data_ascii/vector.txt.gold",1,isBinary=False)
     assert(np.all(np.abs(vec0_gold - vec0) < tol))
 
   # distributed read
-  mat_gold = read_array_distributed(comm, "matrix.txt.gold",numCols,isBinary=False)
+  mat_gold = read_array_distributed(comm, "data_ascii/matrix.txt.gold",numCols,isBinary=False)
   assert(np.all(np.abs(mat_gold.data() - mat.data()) < tol))
 
-  vec_gold = read_array_distributed(comm, "vector.txt.gold",1,isBinary=False)
+  vec_gold = read_array_distributed(comm, "data_ascii/vector.txt.gold",1,isBinary=False)
   assert(np.all(np.abs(vec_gold.data() - vec.data()) < tol))
 
   # serial write
   if rank==0:
-    write_array(mat0,"matrix.txt",isBinary=False)
-    mat0_in = read_array("matrix.txt",numCols,isBinary=False)
+    write_array(mat0,"data_ascii/matrix.txt",isBinary=False)
+    mat0_in = read_array("data_ascii/matrix.txt",numCols,isBinary=False)
     assert(np.all(np.abs(mat0_in - mat0) < tol))
 
-    write_array(vec0,"vector.txt",isBinary=False)
-    vec0_in = read_array("vector.txt",1,isBinary=False)
+    write_array(vec0,"data_ascii/vector.txt",isBinary=False)
+    vec0_in = read_array("data_ascii/vector.txt",1,isBinary=False)
     assert(np.all(np.abs(vec0_in - vec0) < tol))
 
   # distributed write
-  write_array_distributed(comm, mat,"matrix.txt",isBinary=False)
-  mat_in = read_array_distributed(comm, "matrix.txt",numCols,isBinary=False)
+  write_array_distributed(comm, mat,"data_ascii/matrix.txt",isBinary=False)
+  mat_in = read_array_distributed(comm, "data_ascii/matrix.txt",numCols,isBinary=False)
   assert(np.all(np.abs(mat_in.data() - mat.data()) < tol))
 
-  write_array_distributed(comm, vec,"vector.txt",isBinary=False)
-  vec_in = read_array_distributed(comm, "vector.txt",1,isBinary=False)
+  write_array_distributed(comm, vec,"data_ascii/vector.txt",isBinary=False)
+  vec_in = read_array_distributed(comm, "data_ascii/vector.txt",1,isBinary=False)
   assert(np.all(np.abs(vec_in.data() - vec.data()) < tol))
 
 
