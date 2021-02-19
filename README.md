@@ -67,17 +67,16 @@ We provide two separate build/installation modes:
     - the matrix is block-row distributed, stored as "matrix.txt.3.i", where i=0,1,2 is the MPI rank
     - Run as:
 	```bash
-	export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
+	export DEMODIR=pressio-tools/demos/svd_parallel_via_driver_script
 	cd pressio-tools/driver-scripts
-	mpirun -n 3 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
+	mpirun -n 3 python3 computeSVD.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
 
   - Look at the *parallel* demo where the parallel SVD is called within Python
     - the matrix is block-row distributed over 3 MPI ranks
     - Run as:
 	```bash
-	export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
-	cd ${DEMODIR}
+	cd pressio-tools/demos/svd_parallel_call_from_python
 	mpirun -n 3 python3 main.py
 	```
 
