@@ -80,7 +80,7 @@ We provide two separate build/installation modes:
     - the matrix is block-row distributed over 3 MPI ranks
     - Run as:
 	```bash
-	cd pressio-tools/demos/svd_parallel_call_from_python
+	cd <your-pressio-tools-clone>/demos/svd_parallel_call_from_python
 	mpirun -n 3 python3 main.py
 	```
 
