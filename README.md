@@ -39,7 +39,7 @@ We provide two separate build/installation modes:
 	- the matrix is stored in a single file
     - Run as:
 	```bash
-	export DEMODIR=pressio-tools/demos/samplemesh_levscores_onnode_via_driver_script
+	export DEMODIR=<fullpath-to-pressio-tools>/demos/samplemesh_levscores_onnode_via_driver_script
 	cd pressio-tools/driver-scripts
 	python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
@@ -48,7 +48,7 @@ We provide two separate build/installation modes:
     - the matrix is block-row distributed, stored as "matrix.txt.3.i", where i=0,1,2 is the MPI rank
     - Run as:
 	```bash
-	export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
+	export DEMODIR=<fullpath-to-pressio-tools>/demos/samplemesh_levscores_parallel_via_driver_script
 	cd pressio-tools/driver-scripts
 	mpirun -n 3 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
@@ -58,7 +58,7 @@ We provide two separate build/installation modes:
 	- the matrix is stored in a single file
     - Run as:
 	```bash
-	export DEMODIR=pressio-tools/demos/svd_onnode_via_driver_script
+	export DEMODIR=<fullpath-to-pressio-tools>/demos/svd_onnode_via_driver_script
 	cd pressio-tools/driver-scripts
 	python3 computeSVD.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
@@ -67,7 +67,7 @@ We provide two separate build/installation modes:
     - the matrix is block-row distributed, stored as "matrix.txt.3.i", where i=0,1,2 is the MPI rank
     - Run as:
 	```bash
-	export DEMODIR=pressio-tools/demos/svd_parallel_via_driver_script
+	export DEMODIR=<fullpath-to-pressio-tools>/demos/svd_parallel_via_driver_script
 	cd pressio-tools/driver-scripts
 	mpirun -n 3 python3 computeSVD.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
