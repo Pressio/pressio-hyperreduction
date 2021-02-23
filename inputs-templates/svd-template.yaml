@@ -1,15 +1,19 @@
 
 SVD:
-  # [string] file name root for the residual basis.
-  # Assumes decomposed files with the names <residual-basis-root-name>.XX.YY,
-  # where XX is the total number of files and YY is the rank number for a given file.
-  # Note that the total number of files must be = to MPI size
-  file-root-name: "matrix.bin"
+  # root of file name for the matrix.
+  # If doing parallel SVD: 
+  #     we assume files decomposed as <file-root-name>.XX.YY,
+  #     where XX is the total number of files and YY is the rank number/file ID.
+  #     Note that the total number of files must be = to MPI size
+  # If doing onnode SVD: 
+  #     assume single file named <file-root-name>.1.0
+  #
+  file-root-name: "matrix.bin" #this is just an example
 
-  # [string] binary or ascii: format of the residual basis file(s)
-  format: "binary"
+  # format of the file(s)
+  format: "binary" or "ascii"
 
-  # [int] number of columns in the residual basis
+  # [int] number of columns of the matrix to read
   num-columns: 4
 
   # node with info on how to handle the left-singular vectors

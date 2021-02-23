@@ -1,0 +1,62 @@
+
+# **mandatory**
+# needed by both state and residual basis
+FullMeshInfo: 
+  # [int] number of nodes in the mesh
+  num-mesh-nodes: 9
+
+  # [int] number of degrees of freedom at each mesh node
+  dofs-per-mesh-node: 2
+
+
+# **mandatory**
+StateBasis: 
+  # file name root for the matrix file(s).
+  # If doing parallel run: 
+  #     assume files decomposed as <file-root-name>.XX.YY,
+  #     where XX is the total number of files and YY is the rank number for a given file.
+  #     Note that the total number of files must be = to MPI size
+  # If doing onnode: 
+  #     assume single file named <file-root-name>.1.0
+  file-root-name: "some string"
+
+  # format of the file(s)
+  format: "binary" or "ascii"
+
+  # [int] number of columns/basis
+  num-columns: 10
+
+
+# **optional**
+ResidualBasis: 
+  # file name root for the matrix file(s).
+  # If doing parallel run: 
+  #     assume files decomposed as <file-root-name>.XX.YY,
+  #     where XX is the total number of files and YY is the rank number for a given file.
+  #     Note that the total number of files must be = to MPI size
+  # If doing onnode: 
+  #     assume single file named <file-root-name>.1.0
+  file-root-name: "some string"
+
+  # [string] binary or ascii: format of the file(s)
+  format: "binary"
+
+  # [int] number of columns/basis
+  num-columns: 10
+
+
+# **mandatory**
+ProjectorMatrix: 
+  # type of hyper-reduction being performed. 
+  # if collocation, ResidualBasis is optional
+  # if gappy-pod,   ResidualBasis is mandatory
+  kind: "collocation" or "gappy-pod" 
+
+  # file containing the sample mesh nodes indices. 
+  # this is the file generated, using, e.g., one of the sample mesh driver scripts.
+  sample-mesh-indices-filename: "something" 
+
+  # format to write
+  format: "binary" or "ascii"
+
+

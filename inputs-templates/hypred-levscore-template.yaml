@@ -1,15 +1,19 @@
 
 ResidualBasis:
-  # [string] file name root for the residual basis.
-  # Assumes decomposed files with the names <residual-basis-root-name>.XX.YY,
-  # where XX is the total number of files and YY is the rank number for a given file.
-  # Note that the total number of files must be = to MPI size
+  # file name root for the matrix file(s).
+  # If doing parallel run: 
+  #     assume files decomposed as <file-root-name>.XX.YY,
+  #     where XX is the total number of files and YY is the rank number for a given file.
+  #     Note that the total number of files must be = to MPI size
+  # If doing onnode: 
+  #     assume single file named <file-root-name>.1.0
+  #
   file-root-name: "matrix.bin"
 
-  # [string] binary or ascii: format of the residual basis file(s)
-  format: "binary"
+  # format of the file(s)
+  format: "binary" or "ascii"
 
-  # [int] number of columns in the residual basis
+  # [int] number of columns/basis
   num-columns: 4
 
   # [int] number of nodes in the mesh
