@@ -1,4 +1,3 @@
-
 # **mandatory**
 # needed by both state and residual basis
 FullMeshInfo: 
@@ -58,5 +57,3 @@ ProjectorMatrix:
 
   # format to write
   format: "binary" or "ascii"
-
-
