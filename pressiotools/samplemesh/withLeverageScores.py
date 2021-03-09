@@ -17,7 +17,6 @@ def _processYamlDictionary(yamlDic):
   # and inserted in the dic by the driver script
   dataDir      = yamlDic["ResidualBasis"]["dataDir"]
 
-
   fileRootName = yamlDic["ResidualBasis"]["file-root-name"]
   fileFmt      = yamlDic["ResidualBasis"]["format"]
   if fileFmt=="binary":
