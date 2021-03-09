@@ -5,15 +5,21 @@ import pressiotools.linalg as ptla
 from pressiotools.io.array_read import *
 from pressiotools.levscores import *
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # all the _fnc are implementation details
 # check the end for the actual publicly exposed function
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#-----------------------------------------------------------------
 def _processYamlDictionary(yamlDic):
+  # dataDir is not an entry specified in the real yaml file
+  # so you won't find it inside the inputs-templates/hypred-levscore-template.yaml
+  # because it is passed to driver script as cmd line arg
+  # and inserted in the dic by the driver script
   dataDir      = yamlDic["ResidualBasis"]["dataDir"]
+
+
   fileRootName = yamlDic["ResidualBasis"]["file-root-name"]
   fileFmt      = yamlDic["ResidualBasis"]["format"]
-
   if fileFmt=="binary":
     isBinary=True
   elif fileFmt=="ascii":

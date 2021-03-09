@@ -15,8 +15,8 @@ if __name__ == '__main__':
     # it makes sense to put the import here
     from mpi4py import MPI
 
-  descString = "Create Galerkin projector matrix needed by hyper-reduced Galerkin\
-                ROMs in pressio."
+  descString = "Create Galerkin projector matrix needed by \
+hyper-reduced Galerkin ROMs in pressio."
 
   # cmd line args
   parser = argparse.ArgumentParser(description=descString)
@@ -42,10 +42,10 @@ If nothing is passed, we use as output the directory where data is loaded from."
 
   # read yaml file
   yaml_in = yaml_read(args.input)
-  yaml_in["StateBasis"]["dataDir"] = args.dataDir
-  if "ResidualBasis" in yaml_in:
-    yaml_in["ResidualBasis"]["dataDir"] = args.dataDir
-  
+  # insert in dic where data lives
+  yaml_in["dataDir"] = args.dataDir
+
+  # set the output directory
   if args.outDir == "":
     yaml_in["ProjectorMatrix"]["outDir"] = args.dataDir
   else:

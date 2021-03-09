@@ -39,6 +39,8 @@ PYBIND11_MODULE(MODNAME, mParent)
   mv.def("data", &mv_t::data);
   mv.def("extentLocal",  &mv_t::extentLocal);
   mv.def("extentGlobal", &mv_t::extentGlobal);
+  mv.def("minRowGidLocal",  &mv_t::minRowGidLocal);
+  mv.def("maxRowGidLocal",  &mv_t::maxRowGidLocal);
 #ifndef PRESSIOTOOLS_ENABLE_TPL_MPI
   mv.def("extent", &mv_t::extent);
 #endif
