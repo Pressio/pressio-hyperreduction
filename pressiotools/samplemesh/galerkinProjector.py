@@ -97,6 +97,35 @@ def _readData(dataDir, dic, comm=None):
     return psi
 
 #-----------------------------------------------------------------
+def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, myNumRows, comm=None):
+  # assume that global indices are:
+  # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
+
+  nullComm = True if comm is None else False
+  rank   = 0 if nullComm else comm.Get_rank()
+  nRanks = 1 if nullComm else comm.Get_size()
+
+  myNumMeshNodes   = int(myNumRows/dofsPerMnode)
+  senddata         = myNumMeshNodes*np.ones(nRanks, dtype=np.int)
+  meshNodesPerRank = np.empty(nRanks,dtype=np.int)
+  if not nullComm:
+    comm.Alltoall(senddata, meshNodesPerRank)
+  
+  myGidBeg = np.sum(meshNodesPerRank[:rank])
+  myGlobalInds = np.arange(myNumMeshNodes) + myGidBeg 
+
+  if np.any(myGlobalInds < 0): sys.exit("Global Indices must be positive")
+ 
+  sampleMeshLocalInds = np.intersect1d(sampleMeshGlobalInds, myGlobalInds) - myGidBeg
+  
+  print(rank,sampleMeshLocalInds + myGidBeg)
+  
+  # convert to indices for state vector or basis matrix 
+  sampleMatrixLocalInds = np.repeat(sampleMeshLocalInds, dofsPerMnode) \
+                          + np.repeat(np.arange(dofsPerMnode), len(sampleMeshLocalInds))
+  return sampleMatrixLocalInds
+
+#-----------------------------------------------------------------
 def _writeResultsToFile(outDir, projector, isBinary=True, comm=None):
   nullComm = True if comm is None else False
   rank   = 0 if nullComm else comm.Get_rank()
@@ -128,40 +157,8 @@ def _createGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
   return projector
 
 #-----------------------------------------------------------------
-def _createCollocationProjectorImpl(phi, smGlobalIndices, comm=None):
-  if comm==None or comm.Get_size()==1:
-    # if we are here, it means that either mpi4py does not exist
-    # or we are using rank==1, so no matter what we are in the shared-mem scenario.
-    # This case is easy because we only need to extract
-    # the rows of phi that match the smGlobalIndices
-    projector = ptla.MultiVector(np.asfortranarray(phi.data()[smGlobalIndices, :]))
-    return projector
-  else:
-    # if we are here, it means that we are in the distributed case.
-    # the collocation-based projector can be obtained by extracting target rows of phi.
-    # However, in the distributed case we need to make sure
-    # that each rank handles the rows that it is supposed to.
-    # We do:
-    # - sort the smGlobalIndices
-    # - on each rank, figure out the rank of global IDs that pertain to that rank
-    # - on each rank, take from sampleMeshIndcs only the elements that fall in that range
-    # - each rank extracts from phi the corresponding indices and we are done
-
-    smI = np.sort(smGlobalIndices)
-
-    # figure out the global indices bounds for this rank
-    myGidBeg = phi.minRowGidLocal()
-    myGidEnd = phi.maxRowGidLocal()
-    # extract the sampleMeshIndices that fall in my range
-    myInd = smI[np.where(np.logical_and(smI>=myGidBeg, smI<=myGidEnd))]
-    print(comm.Get_rank(), myInd)
-
-    # to get the LOCAL rows of phi, subtract from myInd myGidBeg
-    myInd2 = myInd - myGidBeg
-    #print(comm.Get_rank(), myInd2)
-
-    projector = ptla.MultiVector(np.asfortranarray(phi.data()[myInd2, :]))
-    return projector
+def _createCollocationProjectorImpl(phi, samplingMatrixLocalInds):
+  return ptla.MultiVector(np.asfortranarray(phi.data()[samplingMatrixLocalInds, :]))
 
 #-----------------------------------------------------------------
 def _createGalerkinProjectorReadYaml(comm, yaml_in):
@@ -177,6 +174,12 @@ def _createGalerkinProjectorReadYaml(comm, yaml_in):
   # Read sample mesh GLOBAL indices
   smGlobInds = np.loadtxt(dic["dataDir"]+"/"+dic["sampMatIndFileName"], dtype=np.int)
 
+  # Determine vector global indices from mesh indices
+  samplingMatrixLocalInds = _getSamplingMatrixLocalInds(smGlobInds,\
+                                                        dic["dofsPerMnode"],\
+                                                        phi.extentLocal(0),\
+                                                        comm)
+
   # dispatch computation
   hrtype = dic["projMatKind"]
   if hrtype == "gappy-pod":
@@ -187,7 +190,7 @@ def _createGalerkinProjectorReadYaml(comm, yaml_in):
 
   elif hrtype == "collocation":
     # we only reed the state basis for this
-    projector = _createCollocationProjectorImpl(phi, smGlobInds, comm)
+    projector = _createCollocationProjectorImpl(phi, samplingMatrixLocalInds)
 
   else:
     sys.exit("Invalid hyper-reduction selection")
