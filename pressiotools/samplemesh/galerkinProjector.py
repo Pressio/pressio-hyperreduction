@@ -3,7 +3,8 @@ import numpy as np
 import pathlib, sys
 import pressiotools.linalg as ptla
 from pressiotools.io.array_read import *
-#TODO from pressiotools.sampling_matrix import *
+from pressiotools.io.array_write import *
+#TODO from pressiotools.sampling_matrix import construct_sampling_matrix
 
 
 # all the _fnc are implementation details
@@ -71,7 +72,7 @@ def _checkInputsValidity(dic):
   if dic["StateBasis"]["nCols"] < 1:
     sys.exit("unsupported input: StateBasis/nCols needs to be greater than 0")
 
-  if dic["ResidualBasis"]["nCols"] < 1:
+  if dic["ResidualBasis"] and dic["ResidualBasis"]["nCols"] < 1:
     sys.exit("unsupported input: ResidualBasis/nCols needs to be greater than 0")
 
   if (dic["projMatKind"] is "gappy-pod") and (dic["ResidualBasis"] is None):
@@ -95,6 +96,40 @@ def _readData(dic, comm=None):
     return psi
 
 #-----------------------------------------------------------------
+def _writeResultsToFile(outDir, projector, isBinary=True, comm=None):
+  nullComm = True if comm is None else False
+  rank   = 0 if nullComm else comm.Get_rank()
+
+  fileName = outDir + "/galerkinProjector"
+  if isBinary:
+    fileName+=".bin"
+  else:
+    fileName+=".txt"
+
+  if nullComm:
+    write_array(projector.data(), fileName, isBinary)
+  else:
+    write_array_distributed(comm, projector, fileName, isBinary)
+
+#-----------------------------------------------------------------
+def _createGalerkinProjectorImpl(phi,psi,sampleMeshInds,hyp_type,comm=None):
+
+  # construct sampling matrix
+  #TODO sampling_mat, mySMInds = construct_sampling_matrix(sampleMeshInds)
+  nSampsLcl = len(sampleMeshInds) #TODO placeholder; replace with the number of local samples in sampling matrix 
+  nCols = psi.data().shape[1]
+  projector = ptla.MultiVector(np.asfortranarray(np.random.rand(nCols,nSampsLcl)))
+
+  #if hyp_type == "collocation":
+    #TODO ptla.product(transpose, transpose, 1., state_basis, sampling_mat, 0, projector)
+  #elif hyp_type =="gappy_pod":
+    #TODO B = sampling_mat * res_basis
+    #TODO B1 = ptla.lingalg.pseudo_inverse(B)
+    #TODO ptla.product(transpose, nontranspose, 1., state_basis, B1, 0, projector)
+
+  return projector
+
+#-----------------------------------------------------------------
 def _createGalerkinProjectorReadYaml(comm, yaml_in):
   # process user inputs
   dic = _processYamlDictionary(yaml_in)
@@ -102,43 +137,23 @@ def _createGalerkinProjectorReadYaml(comm, yaml_in):
   # check that inputs are valid, exit with error otherwise
   _checkInputsValidity(dic)
 
-  print("parsed inputs!")
-  print(dic)
+  # read state basis matrix
+  phi = _readData(dic["StateBasis"], comm)
 
-  ## read state basis matrix
-  #phi = _readData(dic["StateBasis"], comm)
-
-  ## Read residual basis if required or specified
-  #if dic["ResidualBasis"]:
-  #  psi = _readData(dic["ResidualBasis"], comm)
-  #else:
-  #  psi = ptla.MultiVector(phi) # deep copy
-
-  #print("read in basis files!")
+  # Read residual basis if required or specified
+  if dic["ResidualBasis"]:
+    psi = _readData(dic["ResidualBasis"], comm)
+  else:
+    psi = ptla.MultiVector(phi.data()) # deep copy
 
   # Read sample mesh indices
-  #sample_mesh_inds = read_sample_mesh_inds(input_dict["SampleMesh"])
-  
-  # construct sampling matrix
-  #sampling_mat = construct_sampling_matrix(sample_mesh_inds)
+  sampleMeshInds = np.loadtxt(dic["sampMatIndFileName"],dtype=np.int)
 
+  # Compute projector matrix
+  projector = _createGalerkinProjectorImpl(phi,psi,sampleMeshInds,comm)
 
-  # compute
-  #TODO
-  # This should be in a subroutine:
-  ## check hyper-reduction type
-  #if hyp_type == "collocation":
-  #  projector = state_basis.transpose() * sampling_mat.transpose()
-  #elif hyp_type =="gappy_pod":
-  #  projector = state_basis.transpose() * res_basis *  pseudo_inverse(sampling_mat * res_basis)
-  #
-
-  # write to disk
-  #TODO
-  #_writeResultsToFile(input_dict, projector)
-
-
-
+  # write projector matrix to disk
+  _writeResultsToFile(dic["outDir"], projector, dic["isBinary"], comm)
 
 #-----------------------------------------------------------------
 # this is the entry function visibile outside, all the other functions
