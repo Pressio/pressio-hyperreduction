@@ -1,7 +1,7 @@
 
 FullMeshInfo:
   num-mesh-nodes: 24
-  dofs-per-mesh-node: 1
+  dofs-per-mesh-node: 2
 
 StateBasis:
   file-root-name: "matrix.txt"
