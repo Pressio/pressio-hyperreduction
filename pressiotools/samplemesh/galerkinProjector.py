@@ -97,7 +97,7 @@ def _readData(dataDir, dic, comm=None):
     return psi
 
 #-----------------------------------------------------------------
-def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, myNumRows, comm=None):
+def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm=None):
   # assume that global indices are:
   # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
 
@@ -105,20 +105,20 @@ def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, myNumRows, c
   rank   = 0 if nullComm else comm.Get_rank()
   nRanks = 1 if nullComm else comm.Get_size()
 
-  myNumMeshNodes   = int(myNumRows/dofsPerMnode)
-  senddata         = myNumMeshNodes*np.ones(nRanks, dtype=np.int)
-  meshNodesPerRank = np.empty(nRanks,dtype=np.int)
-  if not nullComm:
-    comm.Alltoall(senddata, meshNodesPerRank)
-  
-  myGidBeg = np.sum(meshNodesPerRank[:rank])
-  myGlobalInds = np.arange(myNumMeshNodes) + myGidBeg 
+  myNumRows = matrix.extentLocal(0)
+  myMinRowGid = matrix.minRowGidLocal()
+  myMaxRowGid = matrix.maxRowGidLocal()
 
-  if np.any(myGlobalInds < 0): sys.exit("Global Indices must be positive")
+  # determine my global mesh indices
+  myNumMeshNodes   = int(myNumRows/dofsPerMnode)
+  myMinMeshGid     = int(myMinRowGid/dofsPerMnode)
+  myGlobalMeshInds = myMinMeshGid + np.arange(myNumMeshNodes)
+
+  if myMinMeshGid < 0: sys.exit("Global Indices must be positive")
  
-  sampleMeshLocalInds = np.intersect1d(sampleMeshGlobalInds, myGlobalInds) - myGidBeg
+  sampleMeshLocalInds = np.intersect1d(sampleMeshGlobalInds, myGlobalMeshInds) - myMinMeshGid
   
-  print(rank,sampleMeshLocalInds + myGidBeg)
+  print(rank,sampleMeshLocalInds + myMinMeshGid)
   
   # convert to indices for state vector or basis matrix 
   sampleMatrixLocalInds = np.repeat(sampleMeshLocalInds, dofsPerMnode) \
@@ -177,7 +177,7 @@ def _createGalerkinProjectorReadYaml(comm, yaml_in):
   # Determine vector global indices from mesh indices
   samplingMatrixLocalInds = _getSamplingMatrixLocalInds(smGlobInds,\
                                                         dic["dofsPerMnode"],\
-                                                        phi.extentLocal(0),\
+                                                        phi,\
                                                         comm)
 
   # dispatch computation
