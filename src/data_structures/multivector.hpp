@@ -25,7 +25,9 @@ public:
 	("A MultiVector is only constructible from rank-2 array");
     }
 
+#ifdef PRESSIOTOOLS_ENABLE_TPL_MPI
     MPI_Comm_rank(comm_, &rank_);
+#endif
     computeGlobalNumRows();
     globalShape_[1] = data_.shape(1);
     computeGlobalIDsRange();
