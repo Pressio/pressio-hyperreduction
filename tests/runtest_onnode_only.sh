@@ -22,3 +22,6 @@ python test_levscores.py
 
 # actual code for doing sample mesh
 python test_sm_levscores.py
+
+# galerkin projector functions
+python test_sm_galerkin_projector.py
