@@ -7,7 +7,8 @@ FullMeshInfo:
   # [int] number of degrees of freedom at each mesh node
   dofs-per-mesh-node: 2
 
-# **mandatory**
+
+# **mandatory because always needed**
 StateBasis:
   # file name root for the matrix file(s).
   # If doing parallel run:
@@ -24,7 +25,8 @@ StateBasis:
   # [int] number of columns/basis
   num-columns: 10
 
-# **optional**
+
+  # **optional: only needed for gappy-pod**
 ResidualBasis:
   # file name root for the matrix file(s).
   # If doing parallel run:
@@ -49,9 +51,9 @@ ProjectorMatrix:
   # if gappy-pod,   ResidualBasis is mandatory
   kind: "collocation" or "gappy-pod"
 
-  # file containing the sample mesh nodes indices.
-  # this is the file generated, using, e.g., one of the sample mesh driver scripts.
-  sample-mesh-indices-filename: "something"
-
   # format to write
   format: "binary" or "ascii"
+
+  # file containing the sample mesh nodes global indices
+  # this is the file generated, using, e.g., one of the sample mesh driver scripts.
+  sample-mesh-indices-filename: "something"

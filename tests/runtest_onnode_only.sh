@@ -20,7 +20,7 @@ cd ..
 # lev scores functions
 python test_levscores.py
 
-# actual code for doing sample mesh
+# sample mesh with lev scores
 python test_sm_levscores.py
 
 # galerkin projector functions

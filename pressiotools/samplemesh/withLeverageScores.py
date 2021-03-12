@@ -181,9 +181,9 @@ def _computeLeverageScoresBasedSampleMeshIndicesReadYaml(comm, yaml_in):
 # and should not be exposed outside
 #-----------------------------------------------------------------
 def computeNodes(**args):
-  if len(args) == 2 \
-     and 'communicator' in args.keys() \
-     and 'yamldic'      in args.keys():
+  if len(args) == 2:
+    assert('communicator' in args.keys())
+    assert('yamldic' in args.keys())
     _computeLeverageScoresBasedSampleMeshIndicesReadYaml(args['communicator'],
                                                          args['yamldic'])
 

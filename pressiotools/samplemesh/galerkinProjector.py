@@ -4,7 +4,6 @@ import pathlib, sys
 import pressiotools.linalg as ptla
 from pressiotools.io.array_read import *
 from pressiotools.io.array_write import *
-#TODO from pressiotools.sampling_matrix import construct_sampling_matrix
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # all the _fnc are implementation details
@@ -97,6 +96,22 @@ def _readData(dataDir, dic, comm=None):
     return psi
 
 #-----------------------------------------------------------------
+def _writeResultsToFile(outDir, projector, isBinary=True, comm=None):
+  nullComm = True if comm is None else False
+  rank   = 0 if nullComm else comm.Get_rank()
+
+  fileName = outDir + "/galerkinProjector"
+  if isBinary:
+    fileName+=".bin"
+  else:
+    fileName+=".txt"
+
+  if nullComm:
+    write_array(projector.data(), fileName, isBinary)
+  else:
+    write_array_distributed(comm, projector, fileName, isBinary)
+
+#-----------------------------------------------------------------
 def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm=None):
   # assume that global indices are:
   # i_rank * n_node_per_rank + i_array_local, i_rank < n_ranks
@@ -115,34 +130,17 @@ def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm
   myGlobalMeshInds = myMinMeshGid + np.arange(myNumMeshNodes)
 
   if myMinMeshGid < 0: sys.exit("Global Indices must be positive")
- 
+
   sampleMeshLocalInds = np.intersect1d(sampleMeshGlobalInds, myGlobalMeshInds) - myMinMeshGid
-  
-  print(rank,sampleMeshLocalInds + myMinMeshGid)
-  
-  # convert to indices for state vector or basis matrix 
-  sampleMatrixLocalInds = np.repeat(sampleMeshLocalInds, dofsPerMnode) \
-                          + np.repeat(np.arange(dofsPerMnode), len(sampleMeshLocalInds))
-  return sampleMatrixLocalInds
+
+  torep = sampleMeshLocalInds*dofsPerMnode+myMinRowGid
+  shift = np.tile(np.arange(dofsPerMnode), len(sampleMeshLocalInds))
+  rowsLocalInds = np.repeat(torep, dofsPerMnode) + shift - myMinRowGid
+  return rowsLocalInds
+
 
 #-----------------------------------------------------------------
-def _writeResultsToFile(outDir, projector, isBinary=True, comm=None):
-  nullComm = True if comm is None else False
-  rank   = 0 if nullComm else comm.Get_rank()
-
-  fileName = outDir + "/galerkinProjector"
-  if isBinary:
-    fileName+=".bin"
-  else:
-    fileName+=".txt"
-
-  if nullComm:
-    write_array(projector.data(), fileName, isBinary)
-  else:
-    write_array_distributed(comm, projector, fileName, isBinary)
-
-#-----------------------------------------------------------------
-def _createGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
+def _computeGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
   # construct sampling matrix
   #TODO sampling_mat, mySMInds = construct_sampling_matrix(smGlobalIndices)
   nSampsLcl = len(smGlobalIndices) #TODO placeholder; replace with the number of local samples in sampling matrix
@@ -157,11 +155,22 @@ def _createGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
   return projector
 
 #-----------------------------------------------------------------
-def _createCollocationProjectorImpl(phi, samplingMatrixLocalInds):
-  return ptla.MultiVector(np.asfortranarray(phi.data()[samplingMatrixLocalInds, :]))
+def _computeGalerkinProjectorImpl(phi,
+                                  dofsPerNode,
+                                  sampleMeshGlobaIndices,
+                                  comm,
+                                  psi):
+
+  rowsLocalInds = _getSamplingMatrixLocalInds(sampleMeshGlobaIndices,\
+                                              dofsPerNode,\
+                                              phi,\
+                                              comm)
+  if psi==None:
+    return ptla.MultiVector(np.asfortranarray(phi.data()[rowsLocalInds, :]))
+
 
 #-----------------------------------------------------------------
-def _createGalerkinProjectorReadYaml(comm, yaml_in):
+def _computeGalerkinProjectorReadYaml(comm, yaml_in):
   # process user inputs
   dic = _processYamlDictionary(yaml_in)
 
@@ -172,25 +181,21 @@ def _createGalerkinProjectorReadYaml(comm, yaml_in):
   phi = _readData(dic["dataDir"], dic["StateBasis"], comm)
 
   # Read sample mesh GLOBAL indices
-  smGlobInds = np.loadtxt(dic["dataDir"]+"/"+dic["sampMatIndFileName"], dtype=np.int)
+  smGidFilePath = dic["dataDir"]+"/"+dic["sampMatIndFileName"]
+  smGlobalIndices = np.loadtxt(smGidFilePath, dtype=np.int)
 
-  # Determine vector global indices from mesh indices
-  samplingMatrixLocalInds = _getSamplingMatrixLocalInds(smGlobInds,\
-                                                        dic["dofsPerMnode"],\
-                                                        phi,\
-                                                        comm)
-
-  # dispatch computation
+  dofsPerNode = dic["dofsPerMnode"]
   hrtype = dic["projMatKind"]
   if hrtype == "gappy-pod":
-    # we need the state and residual basis for this
     psi = _readData(dic["ResidualBasis"], comm)
-    #projector = _createGappyProjectorImpl(phi, psi, smGlobInds, comm)
-    sys.exit("Gal proj for gappy NOT implemented yet")
+    projector = _computeGalerkinProjectorImpl(phi, dofsPerNode,
+                                        smGlobalIndices,
+                                        comm, psi)
 
   elif hrtype == "collocation":
-    # we only reed the state basis for this
-    projector = _createCollocationProjectorImpl(phi, samplingMatrixLocalInds)
+    projector = _computeGalerkinProjectorImpl(phi, dofsPerNode,
+                                        smGlobalIndices,
+                                        comm, None)
 
   else:
     sys.exit("Invalid hyper-reduction selection")
@@ -198,17 +203,50 @@ def _createGalerkinProjectorReadYaml(comm, yaml_in):
   if projector == None:
     sys.exit("Computed invalid projector, something went wrong")
 
-  # write projector matrix to disk
+  # write projector matrix
   _writeResultsToFile(dic["outDir"], projector, dic["isBinary"], comm)
+
 
 #-----------------------------------------------------------------
 # this is the entry function visibile outside, all the other functions
 # above are implementation details (note the _ prepending all names)
 # and should not be exposed outside
 #-----------------------------------------------------------------
-def createGalerkinProjector(**args):
-  if len(args) == 2 \
-     and 'communicator' in args.keys() \
-     and 'yamldic'      in args.keys():
-    _createGalerkinProjectorReadYaml(args['communicator'],
-                                     args['yamldic'])
+def computeGalerkinProjector(**args):
+  calledFromDriver = True if 'fromDriver' in args.keys() else False
+
+  # if this is called from driverscript
+  if calledFromDriver:
+    assert(len(args) == 3)
+    assert('communicator' in args.keys())
+    assert('yamldic'      in args.keys())
+    _computeGalerkinProjectorReadYaml(args['communicator'],
+                                      args['yamldic'])
+
+  # if not called from driver, it is called from within python
+  # and there is no comm here, so this is sharedmem
+  elif not calledFromDriver \
+       and len(args) == 3 \
+       and 'stateBasis'         in args.keys() \
+       and 'sampleMeshIndices'  in args.keys() \
+       and 'dofsPerMeshNode'    in args.keys():
+
+    return _computeGalerkinProjectorImpl(args["stateBasis"],
+                                         args["dofsPerMeshNode"],
+                                         args['sampleMeshIndices'],
+                                         None, None)
+
+  # if not called from driver, it is called from within python
+  # but we have a valid comm passed
+  elif not calledFromDriver \
+       and len(args) == 4 \
+       and 'stateBasis'         in args.keys() \
+       and 'sampleMeshIndices'  in args.keys() \
+       and 'dofsPerMeshNode'    in args.keys() \
+       and 'communicator'       in args.keys():
+
+    return _computeGalerkinProjectorImpl(args["stateBasis"],
+                                         args["dofsPerMeshNode"],
+                                         args['sampleMeshIndices'],
+                                         args['communicator'],
+                                         None)
