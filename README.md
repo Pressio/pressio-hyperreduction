@@ -41,7 +41,7 @@ We provide two separate build/installation modes:
 	```bash
 	export DEMODIR=pressio-tools/demos/samplemesh_levscores_onnode_via_driver_script
 	cd pressio-tools/driver-scripts
-	python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
+	python3 hypredLevscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
 
   - Look at the *parallel* demo where data is split over multiple ascii files
@@ -50,7 +50,7 @@ We provide two separate build/installation modes:
 	```bash
 	export DEMODIR=pressio-tools/demos/samplemesh_levscores_parallel_via_driver_script
 	cd pressio-tools/driver-scripts
-	mpirun -n 3 python3 hypred_levscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
+	mpirun -n 3 python3 hypredLevscores.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
 
 ### Interested in the *SVD* functionality?
@@ -60,7 +60,7 @@ We provide two separate build/installation modes:
 	```bash
 	export DEMODIR=pressio-tools/demos/svd_onnode_via_driver_script
 	cd pressio-tools/driver-scripts
-	python3 computeSVD.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
+	python3 computeSvd.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
 
   - Look at the *parallel* demo where data is split over multiple ascii files
@@ -69,7 +69,7 @@ We provide two separate build/installation modes:
 	```bash
 	export DEMODIR=pressio-tools/demos/svd_parallel_via_driver_script
 	cd pressio-tools/driver-scripts
-	mpirun -n 3 python3 computeSVD.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
+	mpirun -n 3 python3 computeSvd.py --input ${DEMODIR}/input.yaml --data-dir=${DEMODIR}
 	```
 
   - Look at the *parallel* demo where the parallel SVD is called within Python
