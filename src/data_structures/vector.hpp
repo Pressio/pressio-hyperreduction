@@ -2,25 +2,23 @@
 #ifndef PRESSIOTOOLS_DS_VEC_HPP_
 #define PRESSIOTOOLS_DS_VEC_HPP_
 
+#include <cstdint>
+
 namespace pressiotools{
 
 class Vector
 {
-  py_f_arr data_;
-#ifdef PRESSIOTOOLS_ENABLE_TPL_MPI
-  MPI_Comm comm_ = MPI_COMM_WORLD;
-#endif
-  std::size_t rank_ = 0;
-  std::size_t globalExtent_ = {};
+public:
+  using ord_t = int;
 
 public:
   Vector() = delete;
 
-  Vector(pybind11::ssize_t localextent)
+  Vector(/*pybind11::ssize_t*/ const ord_t localextent)
     : data_(localextent)
   {
     constexpr auto zero = static_cast<pressiotools::scalar_t>(0);
-    for (pybind11::ssize_t i=0; i<localextent; ++i){
+    for (ord_t i=0; i<localextent; ++i){
       data_(i) = zero;
     }
 
@@ -57,6 +55,10 @@ public:
 
   py_f_arr data(){
     return data_;
+  }
+
+  uintptr_t address() const{
+    return reinterpret_cast<uintptr_t>(data_.data());
   }
 
 #ifdef PRESSIOTOOLS_ENABLE_TPL_MPI
@@ -114,15 +116,24 @@ public:
 private:
   void computeGlobalExtent()
   {
-    const std::size_t localN = data_.shape(0);
+    const ord_t localN = data_.shape(0);
 
 #ifdef PRESSIOTOOLS_ENABLE_TPL_MPI
     MPI_Allreduce(&localN, &globalExtent_, 1,
-		  MPI_UNSIGNED_LONG, MPI_SUM, comm_);
+		  MPI_INT, MPI_SUM, comm_);
 #else
     globalExtent_ = localN;
 #endif
   }
+
+private:
+  py_f_arr data_;
+#ifdef PRESSIOTOOLS_ENABLE_TPL_MPI
+  MPI_Comm comm_ = MPI_COMM_WORLD;
+#endif
+  ord_t rank_ = 0;
+  ord_t globalExtent_ = {};
+
 };
 
 }//end namespace pressiotools

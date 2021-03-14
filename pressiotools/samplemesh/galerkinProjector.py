@@ -107,7 +107,7 @@ def _writeResultsToFile(outDir, projector, isBinary=True, comm=None):
     fileName+=".txt"
 
   if nullComm:
-    write_array(projector.data(), fileName, isBinary)
+    write_array(projector, fileName, isBinary)
   else:
     write_array_distributed(comm, projector, fileName, isBinary)
 
@@ -120,39 +120,42 @@ def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm
   rank   = 0 if nullComm else comm.Get_rank()
   nRanks = 1 if nullComm else comm.Get_size()
 
-  myNumRows = matrix.extentLocal(0)
-  myMinRowGid = matrix.minRowGidLocal()
-  myMaxRowGid = matrix.maxRowGidLocal()
+  if len(sampleMeshGlobalInds) == 0:
+    return []
+  else:
+    myNumRows = matrix.extentLocal(0)
+    myMinRowGid = matrix.minRowGidLocal()
+    myMaxRowGid = matrix.maxRowGidLocal()
 
-  # determine my global mesh indices
-  myNumMeshNodes   = int(myNumRows/dofsPerMnode)
-  myMinMeshGid     = int(myMinRowGid/dofsPerMnode)
-  myGlobalMeshInds = myMinMeshGid + np.arange(myNumMeshNodes)
+    # determine my global mesh indices
+    myNumMeshNodes   = int(myNumRows/dofsPerMnode)
+    myMinMeshGid     = int(myMinRowGid/dofsPerMnode)
+    myGlobalMeshInds = myMinMeshGid + np.arange(myNumMeshNodes)
 
-  if myMinMeshGid < 0: sys.exit("Global Indices must be positive")
+    if myMinMeshGid < 0: sys.exit("Global Indices must be positive")
 
-  sampleMeshLocalInds = np.intersect1d(sampleMeshGlobalInds, myGlobalMeshInds) - myMinMeshGid
+    sampleMeshLocalInds = np.intersect1d(sampleMeshGlobalInds, myGlobalMeshInds) - myMinMeshGid
 
-  torep = sampleMeshLocalInds*dofsPerMnode+myMinRowGid
-  shift = np.tile(np.arange(dofsPerMnode), len(sampleMeshLocalInds))
-  rowsLocalInds = np.repeat(torep, dofsPerMnode) + shift - myMinRowGid
-  return rowsLocalInds
+    torep = sampleMeshLocalInds*dofsPerMnode+myMinRowGid
+    shift = np.tile(np.arange(dofsPerMnode), len(sampleMeshLocalInds))
+    rowsLocalInds = np.repeat(torep, dofsPerMnode) + shift - myMinRowGid
+    return rowsLocalInds.tolist()
 
 
-#-----------------------------------------------------------------
-def _computeGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
-  # construct sampling matrix
-  #TODO sampling_mat, mySMInds = construct_sampling_matrix(smGlobalIndices)
-  nSampsLcl = len(smGlobalIndices) #TODO placeholder; replace with the number of local samples in sampling matrix
-  nCols = psi.data().shape[1]
-  projector = ptla.MultiVector(np.asfortranarray(np.random.rand(nCols,nSampsLcl)))
-  #if hyp_type == "collocation":
-  #TODO ptla.product(transpose, transpose, 1., state_basis, sampling_mat, 0, projector)
-  #elif hyp_type =="gappy_pod":
-  #TODO B = sampling_mat * res_basis
-  #TODO B1 = ptla.lingalg.pseudo_inverse(B)
-  #TODO ptla.product(transpose, nontranspose, 1., state_basis, B1, 0, projector)
-  return projector
+# #-----------------------------------------------------------------
+# def _computeGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
+#   # construct sampling matrix
+#   #TODO sampling_mat, mySMInds = construct_sampling_matrix(smGlobalIndices)
+#   nSampsLcl = len(smGlobalIndices) #TODO placeholder; replace with the number of local samples in sampling matrix
+#   nCols = psi.data().shape[1]
+#   projector = ptla.MultiVector(np.asfortranarray(np.random.rand(nCols,nSampsLcl)))
+#   #if hyp_type == "collocation":
+#   #TODO ptla.product(transpose, transpose, 1., state_basis, sampling_mat, 0, projector)
+#   #elif hyp_type =="gappy_pod":
+#   #TODO B = sampling_mat * res_basis
+#   #TODO B1 = ptla.lingalg.pseudo_inverse(B)
+#   #TODO ptla.product(transpose, nontranspose, 1., state_basis, B1, 0, projector)
+#   return projector
 
 #-----------------------------------------------------------------
 def _computeGalerkinProjectorImpl(phi,
@@ -161,12 +164,44 @@ def _computeGalerkinProjectorImpl(phi,
                                   comm,
                                   psi):
 
+  nullComm = True if comm is None else False
+  rank     = 0 if nullComm else comm.Get_rank()
+  nRanks   = 1 if nullComm else comm.Get_size()
+
   rowsLocalInds = _getSamplingMatrixLocalInds(sampleMeshGlobaIndices,\
                                               dofsPerNode,\
                                               phi,\
                                               comm)
+
   if psi==None:
-    return ptla.MultiVector(np.asfortranarray(phi.data()[rowsLocalInds, :]))
+    #########################
+    ###    collocation    ###
+    #########################
+    return None if len(rowsLocalInds)==0 else phi.data()[rowsLocalInds, :]
+
+  else:
+    #################
+    ###   gappy   ###
+    #################
+    # compute ((Z*psi)^+)^T psi^T phi
+    # note that this is the transpose of the projector operator
+    # as defined in the documentation because we want the projector
+    # to be row-distribted as the FOM velocity or residual.
+    # In general, this projector has MANY rows.
+
+    # phi and psi must have same number of rows
+    # but NOT necessarely same num of cols
+    assert(phi.data().shape[0] == psi.data().shape[0])
+
+    zpsi = ptla.MultiVector(np.asfortranarray(psi.data()[rowsLocalInds, :]))
+    pinvObj = ptla.PseudoInverse()
+    pinvObj.compute(zpsi)
+
+    # C = psi^T phi: is replicated on all ranks
+    C = np.zeros((psi.extentLocal(1), phi.extentLocal(1)), order='F')
+    ptla.product('T','N', 1., psi, phi, 0., C)
+    result = pinvObj.applyTranspose(C)
+    return None if len(rowsLocalInds)==0 else result
 
 
 #-----------------------------------------------------------------
@@ -186,25 +221,14 @@ def _computeGalerkinProjectorReadYaml(comm, yaml_in):
 
   dofsPerNode = dic["dofsPerMnode"]
   hrtype = dic["projMatKind"]
-  if hrtype == "gappy-pod":
-    psi = _readData(dic["ResidualBasis"], comm)
-    projector = _computeGalerkinProjectorImpl(phi, dofsPerNode,
-                                        smGlobalIndices,
-                                        comm, psi)
-
-  elif hrtype == "collocation":
-    projector = _computeGalerkinProjectorImpl(phi, dofsPerNode,
-                                        smGlobalIndices,
-                                        comm, None)
-
-  else:
-    sys.exit("Invalid hyper-reduction selection")
-
-  if projector == None:
-    sys.exit("Computed invalid projector, something went wrong")
+  psi = None if dic["projMatKind"]=="collocation" else _readData(dic["ResidualBasis"], comm)
+  projector = _computeGalerkinProjectorImpl(phi, dofsPerNode,
+                                            smGlobalIndices,
+                                            comm, psi)
 
   # write projector matrix
-  _writeResultsToFile(dic["outDir"], projector, dic["isBinary"], comm)
+  if projector != None:
+    _writeResultsToFile(dic["outDir"], projector, dic["isBinary"], comm)
 
 
 #-----------------------------------------------------------------
@@ -224,29 +248,14 @@ def computeGalerkinProjector(**args):
                                       args['yamldic'])
 
   # if not called from driver, it is called from within python
-  # and there is no comm here, so this is sharedmem
-  elif not calledFromDriver \
-       and len(args) == 3 \
-       and 'stateBasis'         in args.keys() \
-       and 'sampleMeshIndices'  in args.keys() \
-       and 'dofsPerMeshNode'    in args.keys():
+  elif not calledFromDriver:
+    assert('stateBasis'         in args.keys())
+    assert('sampleMeshIndices'  in args.keys())
+    assert('dofsPerMeshNode'    in args.keys())
+    comm = None if 'communicator'  not in args.keys() else args['communicator']
+    psi  = None if 'residualBasis' not in args.keys() else args['residualBasis']
 
     return _computeGalerkinProjectorImpl(args["stateBasis"],
                                          args["dofsPerMeshNode"],
                                          args['sampleMeshIndices'],
-                                         None, None)
-
-  # if not called from driver, it is called from within python
-  # but we have a valid comm passed
-  elif not calledFromDriver \
-       and len(args) == 4 \
-       and 'stateBasis'         in args.keys() \
-       and 'sampleMeshIndices'  in args.keys() \
-       and 'dofsPerMeshNode'    in args.keys() \
-       and 'communicator'       in args.keys():
-
-    return _computeGalerkinProjectorImpl(args["stateBasis"],
-                                         args["dofsPerMeshNode"],
-                                         args['sampleMeshIndices'],
-                                         args['communicator'],
-                                         None)
+                                         comm, psi)

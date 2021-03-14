@@ -3,6 +3,17 @@ import pathlib, sys
 import numpy as np
 import pressiotools.linalg as ptla
 
+def mv_cntr(comm):
+  rank = comm.Get_rank()
+  if (rank==0): nrows = 0
+  if (rank==1): nrows = 6
+  if (rank==2): nrows = 4
+  if (rank==3): nrows = 6
+
+  d = np.zeros((nrows,3), order='F')
+  A = ptla.MultiVector(d)
+  print(rank, A.extentLocal(0), A.extentLocal(1))
+
 def mv_extent(comm):
   rank = comm.Get_rank()
   if (rank==0): nrows = 5
@@ -72,7 +83,8 @@ if __name__ == '__main__':
   comm = MPI.COMM_WORLD
   assert(comm.Get_size() == 4)
 
-  mv_extent(comm)
-  mv_extent_global(comm)
-  mv_content(comm)
-  mv_content1(comm)
+  mv_cntr(comm)
+  #mv_extent(comm)
+  #mv_extent_global(comm)
+  #mv_content(comm)
+  #mv_content1(comm)

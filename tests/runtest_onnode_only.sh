@@ -11,7 +11,7 @@ cd test_yaml_rw
 python ./test_yaml.py
 cd ..
 
-# io array
+# i/o array
 cd test_io
 python test_ascii_io.py
 python test_binary_io.py
