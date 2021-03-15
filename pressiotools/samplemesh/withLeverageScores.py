@@ -5,15 +5,20 @@ import pressiotools.linalg as ptla
 from pressiotools.io.array_read import *
 from pressiotools.levscores import *
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # all the _fnc are implementation details
 # check the end for the actual publicly exposed function
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#-----------------------------------------------------------------
 def _processYamlDictionary(yamlDic):
+  # dataDir is not an entry specified in the real yaml file
+  # so you won't find it inside the inputs-templates/hypred-levscore-template.yaml
+  # because it is passed to driver script as cmd line arg
+  # and inserted in the dic by the driver script
   dataDir      = yamlDic["ResidualBasis"]["dataDir"]
+
   fileRootName = yamlDic["ResidualBasis"]["file-root-name"]
   fileFmt      = yamlDic["ResidualBasis"]["format"]
-
   if fileFmt=="binary":
     isBinary=True
   elif fileFmt=="ascii":
@@ -176,9 +181,9 @@ def _computeLeverageScoresBasedSampleMeshIndicesReadYaml(comm, yaml_in):
 # and should not be exposed outside
 #-----------------------------------------------------------------
 def computeNodes(**args):
-  if len(args) == 2 \
-     and 'communicator' in args.keys() \
-     and 'yamldic'      in args.keys():
+  if len(args) == 2:
+    assert('communicator' in args.keys())
+    assert('yamldic' in args.keys())
     _computeLeverageScoresBasedSampleMeshIndicesReadYaml(args['communicator'],
                                                          args['yamldic'])
 

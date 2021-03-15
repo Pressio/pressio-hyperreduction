@@ -33,8 +33,17 @@ def vec_content1():
   gold = np.ones(5)
   assert(np.allclose(gold, nativeView))
 
+def vec_address():
+  vPy = np.ones(5)
+  addPy = hex(vPy.__array_interface__['data'][0])
+  v = ptla.Vector(vPy)
+  addV = v.address()
+  print(addPy, hex(addV))
+  assert( addPy == hex(addV) )
+
 if __name__ == '__main__':
   vec_constr()
   vec_extent()
   vec_content()
   vec_content1()
+  vec_address()

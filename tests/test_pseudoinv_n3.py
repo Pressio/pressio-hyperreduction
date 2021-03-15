@@ -6,6 +6,7 @@ import scipy.linalg as la
 
 np.set_printoptions(linewidth=140)
 
+#-----------------------------------------
 def pinv_run(comm):
   rank = comm.Get_rank()
   np.random.seed(312367)
@@ -30,7 +31,7 @@ def pinv_run(comm):
   myBT = BT[myStartRow:myStartRow+5, :]
   assert(np.allclose(myBT, AstarT, atol=1e-10))
 
-
+#-----------------------------------------
 def pinv_apply(comm):
   print("\n")
   rank = comm.Get_rank()

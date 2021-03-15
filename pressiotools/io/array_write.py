@@ -28,5 +28,8 @@ def write_array_distributed(comm, arr, rootFileName, isBinary=True):
   nDigit = int(math.log10(size)) + 1
   # write BaseVector portion on each processor
   myFileName = "{}.{}.{:0{width}d}".format(rootFileName,size,rank,width=nDigit)
-  myArr = arr.data()
-  write_array(myArr,myFileName,isBinary)
+  if isinstance(arr, np.ndarray):
+    write_array(arr, myFileName, isBinary)
+  else:
+    myArr = arr.data()
+    write_array(myArr, myFileName, isBinary)
