@@ -141,22 +141,6 @@ def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm
     rowsLocalInds = np.repeat(torep, dofsPerMnode) + shift - myMinRowGid
     return rowsLocalInds.tolist()
 
-
-# #-----------------------------------------------------------------
-# def _computeGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
-#   # construct sampling matrix
-#   #TODO sampling_mat, mySMInds = construct_sampling_matrix(smGlobalIndices)
-#   nSampsLcl = len(smGlobalIndices) #TODO placeholder; replace with the number of local samples in sampling matrix
-#   nCols = psi.data().shape[1]
-#   projector = ptla.MultiVector(np.asfortranarray(np.random.rand(nCols,nSampsLcl)))
-#   #if hyp_type == "collocation":
-#   #TODO ptla.product(transpose, transpose, 1., state_basis, sampling_mat, 0, projector)
-#   #elif hyp_type =="gappy_pod":
-#   #TODO B = sampling_mat * res_basis
-#   #TODO B1 = ptla.lingalg.pseudo_inverse(B)
-#   #TODO ptla.product(transpose, nontranspose, 1., state_basis, B1, 0, projector)
-#   return projector
-
 #-----------------------------------------------------------------
 def _computeGalerkinProjectorImpl(phi,
                                   dofsPerNode,
@@ -226,8 +210,8 @@ def _computeGalerkinProjectorReadYaml(comm, yaml_in):
                                             smGlobalIndices,
                                             comm, psi)
 
-  # write projector matrix
-  if projector != None:
+  # write projector matrix only if it has data in it
+  if isinstance(projector, np.ndarray):
     _writeResultsToFile(dic["outDir"], projector, dic["isBinary"], comm)
 
 

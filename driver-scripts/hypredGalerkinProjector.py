@@ -2,7 +2,7 @@
 import argparse, sys, importlib
 import importlib
 from pressiotools.io.yaml_parser import yaml_read
-from pressiotools.samplemesh.galerkinProjector import computeGalerkinProjector
+from pressiotools.romoperators.galerkinProjector import computeGalerkinProjector
 
 #--------------------------
 if __name__ == '__main__':

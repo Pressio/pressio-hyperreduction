@@ -2,7 +2,7 @@
 import numpy as np
 import sys
 import pressiotools.linalg as ptla
-from pressiotools.samplemesh.galerkinProjector import computeGalerkinProjector
+from pressiotools.romoperators.galerkinProjector import computeGalerkinProjector
 
 np.set_printoptions(linewidth=140,precision=14)
 tol = 1e-14

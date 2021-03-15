@@ -323,7 +323,8 @@ def run_setup():
               "HPC"],
     packages=['pressiotools',
               'pressiotools.io',
-              'pressiotools.samplemesh'],
+              'pressiotools.samplemesh',
+              'pressiotools.romoperators'],
   )
 
 if __name__ == '__main__':
