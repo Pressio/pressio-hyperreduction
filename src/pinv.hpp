@@ -102,7 +102,10 @@ struct Pinv
     auto numC = ApsiT_.numCols();
     pressiotools::py_f_arr result({numC});
     for (decltype(numC) i=0; i<numC; i++){
-      epAsT(i)->Dot(epOperand, &result(i));
+      int rc = epAsT(i)->Dot(epOperand, &result(i));
+	if (rc!=0){
+	  throw std::runtime_error("Error computing epetra dot");
+	}
     }
 
     return result;

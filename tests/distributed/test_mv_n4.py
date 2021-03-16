@@ -84,7 +84,7 @@ if __name__ == '__main__':
   assert(comm.Get_size() == 4)
 
   mv_cntr(comm)
-  #mv_extent(comm)
-  #mv_extent_global(comm)
-  #mv_content(comm)
-  #mv_content1(comm)
+  mv_extent(comm)
+  mv_extent_global(comm)
+  mv_content(comm)
+  mv_content1(comm)

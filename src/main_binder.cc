@@ -51,7 +51,8 @@ PYBIND11_MODULE(MODNAME, mParent)
 
 #ifdef PRESSIOTOOLS_ENABLE_TPL_TRILINOS
   // bind ops
-  mParent.def("product", &pressiotools::ops::product);
+  mParent.def("product",           &pressiotools::ops::product);
+  mParent.def("selfTransposeSelf", &pressiotools::ops::selfTransposeSelf);
 
   // bind tsqr
   using tsqr_t = pressiotools::Tsqr;
