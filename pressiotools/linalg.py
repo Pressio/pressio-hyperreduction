@@ -14,11 +14,13 @@ class OnNodePySvd:
   def __init__(self):
     self.U_ = None
     self.S_ = None
-    self.V_ = None
+    self.VT_ = None
 
   def computeThin(self, A):
     assert(A.data().ndim == 2)
-    self.U_, self.S_, self.V_ = _scipyla.svd(A.data(), full_matrices=False)
+    # scipy svd returns V^T, which means that the
+    # right sing vecs are stored as rows of VT_
+    self.U_, self.S_, self.VT_ = _scipyla.svd(A.data(), full_matrices=False)
 
   def viewSingValues(self):
     return self.S_
@@ -27,7 +29,7 @@ class OnNodePySvd:
     return np.asfortranarray(self.U_)
 
   def viewRightSingVectorsT(self):
-    return np.asfortranarray(self.V_.T)
+    return np.asfortranarray(self.VT_)
 
 
 class OnNodePyQR:

@@ -35,14 +35,12 @@ def _processYamlDictionary(yamlDic):
 
   dofsPerMnode = yamlDic["FullMeshInfo"]["dofs-per-mesh-node"]
 
-  # state basis info
-  stateBasisDic = _processYamlDictionaryForBasis(yamlDic["StateBasis"])
   # residual basis info
   residBasisDic = _processYamlDictionaryForBasis(yamlDic["ResidualBasis"])
 
   # weighting matrix info
   outDir             = yamlDic["WeightingMatrix"]["outDir"]
-  weightMatKind        = yamlDic["WeightingMatrix"]["kind"]
+  weightMatKind      = yamlDic["WeightingMatrix"]["kind"]
   sampMatIndFileName = yamlDic["WeightingMatrix"]["sample-mesh-indices-filename"]
   fileFmt            = yamlDic["WeightingMatrix"]["format"]
   if fileFmt=="binary":
@@ -53,7 +51,6 @@ def _processYamlDictionary(yamlDic):
     sys.exit("Unsupported file format: format must be 'binary' or 'ascii'.")
 
   return {"dofsPerMnode"       : dofsPerMnode,
-          "StateBasis"         : stateBasisDic,
           "ResidualBasis"      : residBasisDic,
           "weightMatKind"        : weightMatKind,
           "sampMatIndFileName" : sampMatIndFileName,
@@ -66,14 +63,11 @@ def _checkInputsValidity(dic):
   if dic["dofsPerMnode"] < 1:
     sys.exit("unsupported input: ResidualBasis/dofs-per-mesh-node needs to be greater than 0")
 
-  if dic["StateBasis"]["nCols"] < 1:
-    sys.exit("unsupported input: StateBasis/nCols needs to be greater than 0")
-
   if dic["ResidualBasis"] and dic["ResidualBasis"]["nCols"] < 1:
     sys.exit("unsupported input: ResidualBasis/nCols needs to be greater than 0")
 
   if dic["weightMatKind"] != "gnat":
-    sys.exit("LSPG Weighting only supports GNAT")
+    sys.exit("In yaml file, you set: *{}*, but LSPG Weighting only supports GNAT".format(dic["weightMatKind"]))
 
 #-----------------------------------------------------------------
 def _readData(dataDir, dic, comm=None):

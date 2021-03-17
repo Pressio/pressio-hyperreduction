@@ -37,9 +37,9 @@ struct Pinv
     // compute SVD of A: A = U S V^T
     Svd svdObj;
     svdObj.computeThin(A);
-    auto S = svdObj.viewS();
-    const auto & U = svdObj.viewNativeU();
-    const auto & VT = svdObj.viewNativeVT();
+    auto S = svdObj.viewSingularValues();
+    const auto & U = svdObj.viewLocalLeftSingVectors();
+    const auto & VT = svdObj.viewRightSingVectorsTransposed();
     const auto m = U.numRows();
     const auto n = U.numCols();
 
@@ -67,11 +67,11 @@ struct Pinv
     if (m != 0){
       constexpr auto zero = static_cast<pressiotools::scalar_t>(0);
       ApsiT_.multiply(Teuchos::NO_TRANS, Teuchos::NO_TRANS,
-		    one, U, SinvVT_, zero);
+		      one, U, SinvVT_, zero);
     }
   }
 
-  pressiotools::py_f_arr viewLocalAstarT(){
+  pressiotools::py_f_arr viewTransposedLocal(){
     pressiotools::py_f_arr view({ApsiT_.numRows(), ApsiT_.numCols()}, ApsiT_.values());
     return view;
   }

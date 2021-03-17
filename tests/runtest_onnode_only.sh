@@ -1,5 +1,8 @@
 #!/bin/python
 
+# ensure that if any of the tests fail, script exits
+set -e
+
 cd onnode
 
 python test_version.py

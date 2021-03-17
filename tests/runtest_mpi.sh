@@ -1,5 +1,8 @@
 #!/bin/python
 
+# ensure that if any of the tests fail, script exits
+set -e
+
 cd distributed
 
 mpirun -np 3 python test_version.py
@@ -44,7 +47,7 @@ mpirun -np 3 python test_levscores_n3.py
 # sample mesh with lev scores
 mpirun -np 3 python test_sm_levscores_n3.py
 
-# galerkin projector 
+# galerkin projector
 mpirun -np 3 python test_galerkin_projector_n3.py
 mpirun -np 6 python test_galerkin_projector_n6.py
 
