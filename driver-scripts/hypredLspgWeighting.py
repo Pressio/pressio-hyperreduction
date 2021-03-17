@@ -2,7 +2,7 @@
 import argparse, sys, importlib
 import importlib
 from pressiotools.io.yaml_parser import yaml_read
-from pressiotools.romoperators.galerkinProjector import computeGalerkinProjector
+from pressiotools.romoperators.lspgWeighting import computeLspgWeighting
 
 #--------------------------
 if __name__ == '__main__':
@@ -15,8 +15,8 @@ if __name__ == '__main__':
     # it makes sense to put the import here
     from mpi4py import MPI
 
-  descString = "Create Galerkin projector matrix needed by \
-hyper-reduced Galerkin ROMs in pressio."
+  descString = "Create LSPG weigthting matrix needed by \
+hyper-reduced LSPG ROMs in pressio."
 
   #------ cmd line args -------#
   parser = argparse.ArgumentParser(description=descString)
@@ -49,13 +49,13 @@ If nothing is passed, we use as output the directory where data is loaded from."
 
   # set the output directory
   if args.outDir == "":
-    yaml_in["ProjectorMatrix"]["outDir"] = args.dataDir
+    yaml_in["WeightingMatrix"]["outDir"] = args.dataDir
   else:
-    yaml_in["ProjectorMatrix"]["outDir"] = args.outDir
+    yaml_in["WeightingMatrix"]["outDir"] = args.outDir
 
   # if mpi4py is found, set commworld otherwise nullify comm
   # this is needed in the implementation to handle the null comm
   comm = MPI.COMM_WORLD if mpi4pyfound else None
 
   # compute projector and write to file
-  computeGalerkinProjector(communicator=comm, yamldic=yaml_in, fromDriver=True)
+  computeLspgWeighting(communicator=comm, yamldic=yaml_in, fromDriver=True)

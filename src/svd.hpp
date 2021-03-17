@@ -30,6 +30,8 @@ struct Svd
 
     // view the factors (note that these have view semantics)
     // R is replicated on each rank, it is a square and small matrix
+    // Q is distributed, we viewing the local part only views the
+    // rows that belong to this rank
     auto R = qrObj.viewR();
     auto Q = qrObj.viewLocalQ();
 
@@ -39,10 +41,11 @@ struct Svd
     if (m!=n) throw std::runtime_error("The R factor is not square!");
 
     // -------------------------------------
-    // 2. compute SVD of R: R = Ur * Sr * Vr
-    //    each rank performs this since R is replicated
-    const char jobu = 'S'; // compute only n vectors of U
-    const char jobv = 'S'; // compute only n rows of of V^T
+    // 2. compute SVD of R: R = Ur * Sr * Vr^T
+    // each rank performs this since R is replicated
+    // note that this returns Vr^T
+    const char jobu  = 'S'; // compute only n cols of Ur
+    const char jobvt = 'S'; // compute only n rows of of Vr^T
     const auto ldu = m;
     const auto ldv = n;
 
@@ -59,7 +62,7 @@ struct Svd
     int lwork = 5*n;
     std::vector<scalar_t> work(lwork);
     int info = -2;
-    lpkObj.GESVD(jobu, jobv, m, n,
+    lpkObj.GESVD(jobu, jobvt, m, n,
 		 R.mutable_data(), m, S_.mutable_data(),
 		 Ur_.values(), ldu,
 		 VT_.values(), ldv,
@@ -87,25 +90,32 @@ struct Svd
     }
   }
 
-  pressiotools::py_f_arr viewS(){
+  // view singular values (contains all of them since they are replicated)
+  pressiotools::py_f_arr viewSingularValues(){
     return S_;
   }
 
-  pressiotools::py_f_arr viewU(){
+  // view left singular vectors, just the local part
+  // because U is row distributed
+  pressiotools::py_f_arr viewLocalLeftSingVectorsPy(){
     pressiotools::py_f_arr view({U_.numRows(), U_.numCols()}, U_.values());
     return view;
   }
 
-  pressiotools::py_f_arr viewVT(){
+  // view the right singular vectors transposed,
+  // VT_ is the tranpose of V, so the rows of VT_ contain
+  // the right singe vectors.
+  // VT is replicated, so each rank has a copy of it
+  pressiotools::py_f_arr viewRightSingVectorsTransposedPy(){
     pressiotools::py_f_arr view({VT_.numRows(), VT_.numCols()}, VT_.values());
     return view;
   }
 
-  const mat_t & viewNativeU(){
+  const mat_t & viewLocalLeftSingVectors(){
     return U_;
   }
 
-  const mat_t & viewNativeVT(){
+  const mat_t & viewRightSingVectorsTransposed(){
     return VT_;
   }
 

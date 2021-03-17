@@ -14,19 +14,22 @@ class OnNodePySvd:
   def __init__(self):
     self.U_ = None
     self.S_ = None
-    self.V_ = None
+    self.VT_ = None
 
   def computeThin(self, A):
-    self.U_, self.S_, self.V_ = _scipyla.svd(A.data(), full_matrices=False)
+    assert(A.data().ndim == 2)
+    # scipy svd returns V^T, which means that the
+    # right sing vecs are stored as rows of VT_
+    self.U_, self.S_, self.VT_ = _scipyla.svd(A.data(), full_matrices=False)
 
   def viewSingValues(self):
     return self.S_
 
   def viewLeftSingVectorsLocal(self):
-    return self.U_
+    return np.asfortranarray(self.U_)
 
   def viewRightSingVectorsT(self):
-    return self.V_.T
+    return np.asfortranarray(self.VT_)
 
 
 class OnNodePyQR:
@@ -37,13 +40,14 @@ class OnNodePyQR:
     self.R_ = None
 
   def computeThinOutOfPlace(self, A):
+    assert(A.data().ndim == 2)
     self.Q_, self.R_ = _scipyla.qr(A.data(), mode='economic')
 
   def viewR(self):
-    return self.R_
+    return np.asfortranarray(self.R_)
 
   def viewQLocal(self):
-    return self.Q_
+    return np.asfortranarray(self.Q_)
 
 
 class OnNodePseudoInverse:
@@ -53,21 +57,24 @@ class OnNodePseudoInverse:
     self.B_ = None
 
   def compute(self, A):
+    assert(A.data().ndim == 2)
     self.B_ = _scipyla.pinv(A.data())
     print(self.B_)
 
   def viewTransposeLocal(self):
-    return self.B_.T
+    return np.asfortranarray(self.B_.T)
 
   def apply(self, operand):
-    return self.B_ * operand.data()
+    return np.asfortranarray(np.dot(self.B_, operand.data()))
 
   def applyTranspose(self, operand):
-    return np.transpose(self.B_).dot(operand[:])
+    return np.asfortranarray(np.transpose(self.B_).dot(operand[:]))
 
 
 # C = beta *C + alpha*op(A)*op(B)
 def OnNodeProduct(modeA, modeB, alpha, A, B, beta, C):
+  assert(A.data().ndim == 2)
+  assert(B.data().ndim == 2)
   An = A.data()
   Bn = B.data()
   # here we need the [:] or it won't overwrite C
@@ -75,14 +82,26 @@ def OnNodeProduct(modeA, modeB, alpha, A, B, beta, C):
     C[:] = beta*C[:] + alpha*np.transpose(An[:]).dot(Bn[:])
   elif modeA=='N' and modeB=='N':
     C[:] = beta*C[:] + alpha*np.matmul(An[:], Bn[:])
+  elif modeA=='N' and modeB=='T':
+    C[:] = beta*C[:] + alpha*np.matmul(An[:], np.transpose(Bn[:]))
   else:
     sys.exit("Case not yet implemented")
 
+# C = alpha*A^T*A
+def OnNodeSelfTransposeSelf(alpha, A, C):
+  An = A.data()
+  # here we need the [:] or it won't overwrite C
+  C[:] = alpha*np.transpose(An[:]).dot(An[:])
 
+
+##############
+### import ###
+##############
 try:
-  from ._linalg import Svd, Tsqr, PseudoInverse, product
+  from ._linalg import Svd, Tsqr, PseudoInverse, product, selfTransposeSelf
 except ImportError:
   Svd  = OnNodePySvd
   Tsqr = OnNodePyQR
   PseudoInverse = OnNodePseudoInverse
   product = OnNodeProduct
+  selfTransposeSelf = OnNodeSelfTransposeSelf

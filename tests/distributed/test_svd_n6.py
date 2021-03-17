@@ -13,7 +13,7 @@ def run1(comm):
 
   numCols = 6
   A0 = np.asfortranarray(np.random.rand(37, numCols))
-  U0,s0,V0 = np.linalg.svd(A0, full_matrices=False)
+  U0,s0,VT0 = np.linalg.svd(A0, full_matrices=False)
   if rank==0:
     print(A0)
     #print(BT)
@@ -37,7 +37,7 @@ def run1(comm):
   # sing values are replicated
   assert(np.allclose(np.abs(s0),np.abs(S1), atol=1e-10))
   # right sing vectors are replicated
-  assert(np.allclose(np.abs(V0),np.abs(VT1), atol=1e-10))
+  assert(np.allclose(np.abs(VT0),np.abs(VT1), atol=1e-10))
 
   # left sing vectors are distributed as A is
   myU0 = U0[locRows, :]

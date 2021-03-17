@@ -28,27 +28,21 @@ def _processYamlDictionaryForBasis(yamlDic):
 #-----------------------------------------------------------------
 def _processYamlDictionary(yamlDic):
   # dataDir is not an entry specified in the real yaml file
-  # so you won't find it inside the inputs-templates/galerkin-projector-template.yaml
+  # so you won't find it inside the inputs-templates/...template.yaml
   # because it is passed to driver script as cmd line arg
   # and inserted in the dic by the driver script
   dataDir      = yamlDic["dataDir"]
 
   dofsPerMnode = yamlDic["FullMeshInfo"]["dofs-per-mesh-node"]
 
-  # state basis info
-  stateBasisDic = _processYamlDictionaryForBasis(yamlDic["StateBasis"])
-
   # residual basis info
-  if "ResidualBasis" in yamlDic:
-    residBasisDic = _processYamlDictionaryForBasis(yamlDic["ResidualBasis"])
-  else:
-    residBasisDic = None
+  residBasisDic = _processYamlDictionaryForBasis(yamlDic["ResidualBasis"])
 
-  # projector matrix info
-  outDir             = yamlDic["ProjectorMatrix"]["outDir"]
-  projMatKind        = yamlDic["ProjectorMatrix"]["kind"]
-  sampMatIndFileName = yamlDic["ProjectorMatrix"]["sample-mesh-indices-filename"]
-  fileFmt            = yamlDic["ProjectorMatrix"]["format"]
+  # weighting matrix info
+  outDir             = yamlDic["WeightingMatrix"]["outDir"]
+  weightMatKind      = yamlDic["WeightingMatrix"]["kind"]
+  sampMatIndFileName = yamlDic["WeightingMatrix"]["sample-mesh-indices-filename"]
+  fileFmt            = yamlDic["WeightingMatrix"]["format"]
   if fileFmt=="binary":
     isBinary=True
   elif fileFmt=="ascii":
@@ -57,9 +51,8 @@ def _processYamlDictionary(yamlDic):
     sys.exit("Unsupported file format: format must be 'binary' or 'ascii'.")
 
   return {"dofsPerMnode"       : dofsPerMnode,
-          "StateBasis"         : stateBasisDic,
           "ResidualBasis"      : residBasisDic,
-          "projMatKind"        : projMatKind,
+          "weightMatKind"        : weightMatKind,
           "sampMatIndFileName" : sampMatIndFileName,
           "isBinary"           : isBinary,
           "outDir"             : outDir,
@@ -70,14 +63,11 @@ def _checkInputsValidity(dic):
   if dic["dofsPerMnode"] < 1:
     sys.exit("unsupported input: ResidualBasis/dofs-per-mesh-node needs to be greater than 0")
 
-  if dic["StateBasis"]["nCols"] < 1:
-    sys.exit("unsupported input: StateBasis/nCols needs to be greater than 0")
-
   if dic["ResidualBasis"] and dic["ResidualBasis"]["nCols"] < 1:
     sys.exit("unsupported input: ResidualBasis/nCols needs to be greater than 0")
 
-  if (dic["projMatKind"] is "gappy-pod") and (dic["ResidualBasis"] is None):
-    sys.exit("Gappy POD requires a residual basis")
+  if dic["weightMatKind"] != "gnat":
+    sys.exit("In yaml file, you set: *{}*, but LSPG Weighting only supports GNAT".format(dic["weightMatKind"]))
 
 #-----------------------------------------------------------------
 def _readData(dataDir, dic, comm=None):
@@ -96,20 +86,20 @@ def _readData(dataDir, dic, comm=None):
     return psi
 
 #-----------------------------------------------------------------
-def _writeResultsToFile(outDir, projector, isBinary=True, comm=None):
+def _writeResultsToFile(outDir, weighting, isBinary=True, comm=None):
   nullComm = True if comm is None else False
   rank   = 0 if nullComm else comm.Get_rank()
 
-  fileName = outDir + "/galerkinProjector"
+  fileName = outDir + "/lspgWeighting"
   if isBinary:
     fileName+=".bin"
   else:
     fileName+=".txt"
 
   if nullComm:
-    write_array(projector, fileName, isBinary)
+    write_array(weighting, fileName, isBinary)
   else:
-    write_array_distributed(comm, projector, fileName, isBinary)
+    write_array_distributed(comm, weighting, fileName, isBinary)
 
 #-----------------------------------------------------------------
 def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm=None):
@@ -141,28 +131,11 @@ def _getSamplingMatrixLocalInds(sampleMeshGlobalInds, dofsPerMnode, matrix, comm
     rowsLocalInds = np.repeat(torep, dofsPerMnode) + shift - myMinRowGid
     return rowsLocalInds.tolist()
 
-
-# #-----------------------------------------------------------------
-# def _computeGappyProjectorImpl(phi, psi, smGlobalIndices, comm=None):
-#   # construct sampling matrix
-#   #TODO sampling_mat, mySMInds = construct_sampling_matrix(smGlobalIndices)
-#   nSampsLcl = len(smGlobalIndices) #TODO placeholder; replace with the number of local samples in sampling matrix
-#   nCols = psi.data().shape[1]
-#   projector = ptla.MultiVector(np.asfortranarray(np.random.rand(nCols,nSampsLcl)))
-#   #if hyp_type == "collocation":
-#   #TODO ptla.product(transpose, transpose, 1., state_basis, sampling_mat, 0, projector)
-#   #elif hyp_type =="gappy_pod":
-#   #TODO B = sampling_mat * res_basis
-#   #TODO B1 = ptla.lingalg.pseudo_inverse(B)
-#   #TODO ptla.product(transpose, nontranspose, 1., state_basis, B1, 0, projector)
-#   return projector
-
 #-----------------------------------------------------------------
-def _computeGalerkinProjectorImpl(phi,
-                                  dofsPerNode,
-                                  sampleMeshGlobaIndices,
-                                  comm,
-                                  psi):
+def _computeLspgWeightingImpl(psi,
+                              dofsPerNode,
+                              sampleMeshGlobaIndices,
+                              comm):
 
   nullComm = True if comm is None else False
   rank     = 0 if nullComm else comm.Get_rank()
@@ -170,73 +143,58 @@ def _computeGalerkinProjectorImpl(phi,
 
   rowsLocalInds = _getSamplingMatrixLocalInds(sampleMeshGlobaIndices,\
                                               dofsPerNode,\
-                                              phi,\
+                                              psi,\
                                               comm)
+  # here we compute:
+  # ((Z*psi)^+)^T psi^T psi (Z*psi)^+
 
-  if psi==None:
-    #########################
-    ###    collocation    ###
-    #########################
-    return None if len(rowsLocalInds)==0 else phi.data()[rowsLocalInds, :]
+  # compute (Z*psi)^+
+  zpsi = ptla.MultiVector(np.asfortranarray(psi.data()[rowsLocalInds, :]))
+  pinvObj = ptla.PseudoInverse()
+  pinvObj.compute(zpsi)
 
-  else:
-    #################
-    ###   gappy   ###
-    #################
-    # compute ((Z*psi)^+)^T psi^T phi
-    # note that this is the transpose of the projector operator
-    # as defined in the documentation because we want the projector
-    # to be row-distribted as the FOM velocity or residual.
-    # In general, this projector has MANY rows.
+  # compute B = psi^T psi, where B is replicated on each rank
+  B = np.zeros((psi.extentLocal(1), psi.extentLocal(1)), order='F')
+  ptla.selfTransposeSelf(1., psi, B)
 
-    # phi and psi must have same number of rows
-    # but NOT necessarely same num of cols
-    assert(phi.data().shape[0] == psi.data().shape[0])
+  # compute C = ((Z*psi)^+)^T psi^T psi
+  C = ptla.MultiVector(pinvObj.applyTranspose(B))
 
-    zpsi = ptla.MultiVector(np.asfortranarray(psi.data()[rowsLocalInds, :]))
-    pinvObj = ptla.PseudoInverse()
-    pinvObj.compute(zpsi)
+  # compute target result
+  zpsiT = ptla.MultiVector(pinvObj.viewTransposeLocal())
+  D = np.zeros((C.extentLocal(0), zpsiT.extentGlobal(0)), order='F')
+  ptla.product('N','T', 1., C, zpsiT, 0., D)
 
-    # C = psi^T phi: is replicated on all ranks
-    C = np.zeros((psi.extentLocal(1), phi.extentLocal(1)), order='F')
-    ptla.product('T','N', 1., psi, phi, 0., C)
-    result = pinvObj.applyTranspose(C)
-    return None if len(rowsLocalInds)==0 else result
-
+  return None if len(rowsLocalInds)==0 else D
 
 #-----------------------------------------------------------------
-def _computeGalerkinProjectorReadYaml(comm, yaml_in):
+def _computeLspgWeightingReadYaml(comm, yaml_in):
   # process user inputs
   dic = _processYamlDictionary(yaml_in)
 
   # check that inputs are valid, exit with error otherwise
   _checkInputsValidity(dic)
 
-  # read state basis matrix
-  phi = _readData(dic["dataDir"], dic["StateBasis"], comm)
+  # read residual basis matrix
+  psi = _readData(dic["dataDir"], dic["ResidualBasis"], comm)
 
   # Read sample mesh GLOBAL indices
   smGidFilePath = dic["dataDir"]+"/"+dic["sampMatIndFileName"]
   smGlobalIndices = np.loadtxt(smGidFilePath, dtype=np.int)
 
   dofsPerNode = dic["dofsPerMnode"]
-  hrtype = dic["projMatKind"]
-  psi = None if dic["projMatKind"]=="collocation" else _readData(dic["ResidualBasis"], comm)
-  projector = _computeGalerkinProjectorImpl(phi, dofsPerNode,
-                                            smGlobalIndices,
-                                            comm, psi)
+  weighting = _computeLspgWeightingImpl(psi, dofsPerNode,smGlobalIndices,comm)
 
-  # write projector matrix
-  if projector != None:
-    _writeResultsToFile(dic["outDir"], projector, dic["isBinary"], comm)
+  # write weighting matrix only if it has data in it
+  if isinstance(weighting, np.ndarray):
+    _writeResultsToFile(dic["outDir"], weighting, dic["isBinary"], comm)
 
-
-#-----------------------------------------------------------------
+#---------------------------------------------------------------------
 # this is the entry function visibile outside, all the other functions
 # above are implementation details (note the _ prepending all names)
 # and should not be exposed outside
-#-----------------------------------------------------------------
-def computeGalerkinProjector(**args):
+#---------------------------------------------------------------------
+def computeLspgWeighting(**args):
   calledFromDriver = True if 'fromDriver' in args.keys() else False
 
   # if this is called from driverscript
@@ -244,18 +202,17 @@ def computeGalerkinProjector(**args):
     assert(len(args) == 3)
     assert('communicator' in args.keys())
     assert('yamldic'      in args.keys())
-    _computeGalerkinProjectorReadYaml(args['communicator'],
-                                      args['yamldic'])
+    _computeLspgWeightingReadYaml(args['communicator'],
+                                  args['yamldic'])
 
   # if not called from driver, it is called from within python
   elif not calledFromDriver:
-    assert('stateBasis'         in args.keys())
+    assert('residualBasis'      in args.keys())
     assert('sampleMeshIndices'  in args.keys())
     assert('dofsPerMeshNode'    in args.keys())
     comm = None if 'communicator'  not in args.keys() else args['communicator']
-    psi  = None if 'residualBasis' not in args.keys() else args['residualBasis']
 
-    return _computeGalerkinProjectorImpl(args["stateBasis"],
-                                         args["dofsPerMeshNode"],
-                                         args['sampleMeshIndices'],
-                                         comm, psi)
+    return _computeLspgWeightingImpl(args["residualBasis"],
+                                     args["dofsPerMeshNode"],
+                                     args['sampleMeshIndices'],
+                                     comm)

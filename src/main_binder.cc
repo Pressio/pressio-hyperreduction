@@ -51,27 +51,39 @@ PYBIND11_MODULE(MODNAME, mParent)
 
 #ifdef PRESSIOTOOLS_ENABLE_TPL_TRILINOS
   // bind ops
-  mParent.def("product", &pressiotools::ops::product);
+  mParent.def("product",
+	      &pressiotools::ops::product);
+  mParent.def("selfTransposeSelf",
+	      &pressiotools::ops::selfTransposeSelf);
 
   // bind tsqr
   using tsqr_t = pressiotools::Tsqr;
   pybind11::class_<tsqr_t> tsqr(mParent, "Tsqr");
   tsqr.def(pybind11::init());
-  tsqr.def("computeThinOutOfPlace", &tsqr_t::computeThinOutOfPlace);
-  tsqr.def("viewR",	 &tsqr_t::viewR,      pybind11::return_value_policy::reference);
-  tsqr.def("viewQLocal", &tsqr_t::viewLocalQ, pybind11::return_value_policy::reference);
+  tsqr.def("computeThinOutOfPlace",
+	   &tsqr_t::computeThinOutOfPlace);
+  tsqr.def("viewR",
+	   &tsqr_t::viewR,
+	   pybind11::return_value_policy::reference);
+  tsqr.def("viewQLocal",
+	   &tsqr_t::viewLocalQ,
+	   pybind11::return_value_policy::reference);
 
   // bind svd
   using svd_t = pressiotools::Svd;
   pybind11::class_<svd_t> svd(mParent, "Svd");
   svd.def(pybind11::init());
-  svd.def("computeThin", &svd_t::computeThin);
+  svd.def("computeThin",
+	  &svd_t::computeThin);
   svd.def("viewSingValues",
-	  &svd_t::viewS,  pybind11::return_value_policy::reference);
+	  &svd_t::viewSingularValues,
+	  pybind11::return_value_policy::reference);
   svd.def("viewLeftSingVectorsLocal",
-	  &svd_t::viewU,  pybind11::return_value_policy::reference);
+	  &svd_t::viewLocalLeftSingVectorsPy,
+	  pybind11::return_value_policy::reference);
   svd.def("viewRightSingVectorsT",
-	  &svd_t::viewVT, pybind11::return_value_policy::reference);
+	  &svd_t::viewRightSingVectorsTransposedPy,
+	  pybind11::return_value_policy::reference);
 
   // bind pinv
   using pinv_t = pressiotools::Pinv;
@@ -79,11 +91,14 @@ PYBIND11_MODULE(MODNAME, mParent)
   pinv.def(pybind11::init());
   pinv.def("compute", &pinv_t::compute);
   pinv.def("viewTransposeLocal",
-	   &pinv_t::viewLocalAstarT, pybind11::return_value_policy::reference);
+	   &pinv_t::viewTransposedLocal,
+	   pybind11::return_value_policy::reference);
   pinv.def("apply",
-	   &pinv_t::apply,	     pybind11::return_value_policy::reference);
+	   &pinv_t::apply,
+	   pybind11::return_value_policy::reference);
   pinv.def("applyTranspose",
-	   &pinv_t::applyTranspose,  pybind11::return_value_policy::reference);
+	   &pinv_t::applyTranspose,
+	   pybind11::return_value_policy::reference);
 #endif
 };
 

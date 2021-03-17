@@ -37,9 +37,9 @@ struct Pinv
     // compute SVD of A: A = U S V^T
     Svd svdObj;
     svdObj.computeThin(A);
-    auto S = svdObj.viewS();
-    const auto & U = svdObj.viewNativeU();
-    const auto & VT = svdObj.viewNativeVT();
+    auto S = svdObj.viewSingularValues();
+    const auto & U = svdObj.viewLocalLeftSingVectors();
+    const auto & VT = svdObj.viewRightSingVectorsTransposed();
     const auto m = U.numRows();
     const auto n = U.numCols();
 
@@ -67,11 +67,11 @@ struct Pinv
     if (m != 0){
       constexpr auto zero = static_cast<pressiotools::scalar_t>(0);
       ApsiT_.multiply(Teuchos::NO_TRANS, Teuchos::NO_TRANS,
-		    one, U, SinvVT_, zero);
+		      one, U, SinvVT_, zero);
     }
   }
 
-  pressiotools::py_f_arr viewLocalAstarT(){
+  pressiotools::py_f_arr viewTransposedLocal(){
     pressiotools::py_f_arr view({ApsiT_.numRows(), ApsiT_.numCols()}, ApsiT_.values());
     return view;
   }
@@ -102,7 +102,10 @@ struct Pinv
     auto numC = ApsiT_.numCols();
     pressiotools::py_f_arr result({numC});
     for (decltype(numC) i=0; i<numC; i++){
-      epAsT(i)->Dot(epOperand, &result(i));
+      int rc = epAsT(i)->Dot(epOperand, &result(i));
+	if (rc!=0){
+	  throw std::runtime_error("Error computing epetra dot");
+	}
     }
 
     return result;
