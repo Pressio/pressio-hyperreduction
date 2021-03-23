@@ -104,8 +104,4 @@ if __name__ == '__main__':
   # it matters where you put it
   from mpi4py import MPI
   comm = MPI.COMM_WORLD
-  if (comm.Get_size() != 4):
-    print("Rerun with 4 ranks")
-    sys.exit()
-
   run(comm, args.N, args.M, args.distribute)
