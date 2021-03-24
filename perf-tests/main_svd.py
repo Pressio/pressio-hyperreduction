@@ -74,7 +74,7 @@ if __name__ == '__main__':
 #-------------------------
   '''
   run with:
-    mpirun -n np python3 svd.py --n <glob-rows> --m <cols> -d <string>
+    mpirun -n np python3 main_svd.py --n <glob-rows> --m <cols> -d <string>
   '''
   parser = argparse.ArgumentParser(description="Svd performance test")
 
