@@ -24,8 +24,8 @@ void product(const char oA,
   {
     assert((std::size_t)A.extentGlobal(0) == (std::size_t)B.extentGlobal(0));
     assert((std::size_t)A.extentLocal(0) == (std::size_t)B.extentLocal(0));
-    assert((std::size_t)C.extent(0) == (std::size_t)A.extentLocal(1));
-    assert((std::size_t)C.extent(1) == (std::size_t)B.extentLocal(1));
+    assert((std::size_t)C.shape(0) == (std::size_t)A.extentLocal(1));
+    assert((std::size_t)C.shape(1) == (std::size_t)B.extentLocal(1));
 
     auto & comm = A.communicator();
     const int globNumRows = A.extentGlobal(0);
@@ -99,8 +99,8 @@ void selfTransposeSelf(const pressiotools::scalar_t alpha,
 		       pressiotools::MultiVector & A,
 		       pressiotools::py_f_arr C)
 {
-  assert((std::size_t)C.extent(0) == (std::size_t)A.extentLocal(1));
-  assert((std::size_t)C.extent(1) == (std::size_t)A.extentLocal(1));
+  assert((std::size_t)C.shape(0) == (std::size_t)A.extentLocal(1));
+  assert((std::size_t)C.shape(1) == (std::size_t)A.extentLocal(1));
 
   auto & comm = A.communicator();
   const int globNumRows = A.extentGlobal(0);
