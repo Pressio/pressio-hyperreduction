@@ -66,7 +66,7 @@ def run(comm, N, M, distribute):
     minT = np.min(all_ts)
     maxT = np.max(all_ts)
     avgT = np.mean(all_ts)
-    print("mean = {}, max = {}, min = {}".format(avgT, minT, maxT))
+    print("mean = {}, max = {}, min = {}".format(avgT, maxT, minT))
 
 
 #-------------------------
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 #-------------------------
   '''
   run with:
-    mpirun -n np python3 main_svd.py --n <glob-rows> --m <cols> -d <string>
+    mpirun -n np python3 main_svd.py --n <glob-rows> --m <cols> [-d <string>]
   '''
   parser = argparse.ArgumentParser(description="Svd performance test")
 
